@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <build>
-        <!-- Add build number to manifest -->
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -23,6 +23,7 @@
                 <version>3.0.2</version>
                 <configuration>
                     <archive>
+                        <!-- Add build number to manifest -->
                         <manifestEntries>
                             <build>${versionName}</build>
                         </manifestEntries>

@@ -12,9 +12,19 @@
     <artifactId>war</artifactId>
     <packaging>war</packaging>
     <name>war</name>
-
     <build>
         <finalName>war</finalName>
+
+        <resources>
+            <resource>
+                <!-- Filter for build number in properties -->
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>app.properties</include>
+                </includes>
+            </resource>
+        </resources>
 
         <plugins>
             <plugin>
@@ -22,7 +32,12 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <!-- Filter for build number -->
+                    <archive>
+                        <manifestEntries>
+                            <version>${versionName}</version>
+                        </manifestEntries>
+                    </archive>
+                    <!-- Filter for build number in html-->
                     <webResources>
                         <resource>
                             <directory>src/main/webapp</directory>
@@ -36,4 +51,23 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <!-- JAX RS -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-servlet-initializer</artifactId>
+            <version>3.0.19.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+            <version>3.0.19.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+    </dependencies>
 </project>

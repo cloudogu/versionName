@@ -12,7 +12,7 @@
     <name>server</name>
 
     <properties>
-        <jetty-version>9.2.19.v20160908</jetty-version>
+        <jetty-version>9.3.11.v20160721</jetty-version>
         <mainClass>de.triology.mavenbuildnumber.ServerMain</mainClass>
     </properties>
 
@@ -58,22 +58,30 @@
 
 
     <dependencies>
-        <!-- ServerMain -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
             <version>${jetty-version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
             <version>${jetty-version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
+            <version>${jetty-version}</version>
+        </dependency>
+        <!-- Make jetty process (JAX-RS/Servlet) annotations -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-annotations</artifactId>
+            <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-plus</artifactId>
             <version>${jetty-version}</version>
         </dependency>
     </dependencies>

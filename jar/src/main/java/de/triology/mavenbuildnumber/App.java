@@ -14,12 +14,19 @@ public class App {
     }
 
     private static String getBuildNumberFromManifest() throws IOException {
-        InputStream manifestStream = App.class.getClassLoader().getResourceAsStream("META-INF/MANIFEST.MF");
-        if (manifestStream != null) {
-            Manifest manifest = new Manifest(manifestStream);
-            Attributes attributes = manifest.getMainAttributes();
-            return attributes.getValue("build");
+        InputStream manifestStream = null;
+        try {
+            manifestStream = App.class.getClassLoader().getResourceAsStream("META-INF/MANIFEST.MF");
+            if (manifestStream != null) {
+                Manifest manifest = new Manifest(manifestStream);
+                Attributes attributes = manifest.getMainAttributes();
+                return attributes.getValue("build");
+            }
+            return null;
+        } finally {
+            if (manifestStream != null) {
+                manifestStream.close();
+            }
         }
-        return null;
     }
 }
