@@ -14,8 +14,12 @@
 
     <packaging>jar</packaging>
 
-    <build>
+    <properties>
+        <mainClass>de.triology.versionname.App</mainClass>
+    </properties>
 
+
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -23,16 +27,49 @@
                 <version>3.0.2</version>
                 <configuration>
                     <archive>
-                        <!-- Add build number to manifest -->
-                        <manifestEntries>
-                            <build>${versionName}</build>
-                        </manifestEntries>
                         <manifest>
-                            <mainClass>de.triology.versionname.App</mainClass>
+                            <mainClass>${mainClass}</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
+            <!-- Build a jar that contains the dependency to versionName module, to keep it simple -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <archive>
+                        <!-- Add build number to manifest -->
+                        <manifestEntries>
+                            <versionName>${versionName}</versionName>
+                        </manifestEntries>
+                        <manifest>
+                            <mainClass>${mainClass}</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <!-- Load version name from file -->
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>versionName</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+    </dependencies>
 </project>
