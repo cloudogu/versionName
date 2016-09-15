@@ -1,4 +1,4 @@
-package de.triology.mavenbuildnumber;
+package de.triology.versionname;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.Configuration;

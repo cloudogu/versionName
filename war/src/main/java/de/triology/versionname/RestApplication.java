@@ -1,4 +1,4 @@
-package de.triology.mavenbuildnumber;
+package de.triology.versionname;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;

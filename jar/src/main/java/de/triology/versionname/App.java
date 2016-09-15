@@ -1,4 +1,4 @@
-package de.triology.mavenbuildnumber;
+package de.triology.versionname;
 
 import java.io.IOException;
 import java.io.InputStream;

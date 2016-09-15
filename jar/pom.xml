@@ -4,8 +4,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>de.triology.mavenBuildNumber</groupId>
-        <artifactId>mavenBuildNumber-parent</artifactId>
+        <groupId>de.triology.versionName</groupId>
+        <artifactId>versionName-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
@@ -28,7 +28,7 @@
                             <build>${versionName}</build>
                         </manifestEntries>
                         <manifest>
-                            <mainClass>de.triology.mavenbuildnumber.App</mainClass>
+                            <mainClass>de.triology.versionname.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

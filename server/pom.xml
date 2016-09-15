@@ -4,8 +4,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>de.triology.mavenBuildNumber</groupId>
-        <artifactId>mavenBuildNumber-parent</artifactId>
+        <groupId>de.triology.versionName</groupId>
+        <artifactId>versionName-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>server</artifactId>
@@ -13,7 +13,7 @@
 
     <properties>
         <jetty-version>9.3.11.v20160721</jetty-version>
-        <mainClass>de.triology.mavenbuildnumber.ServerMain</mainClass>
+        <mainClass>de.triology.versionname.ServerMain</mainClass>
     </properties>
 
     <build>
