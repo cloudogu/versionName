@@ -1,9 +1,15 @@
 package de.triology.versionname;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import uk.org.lidalia.slf4jext.Level;
+import uk.org.lidalia.slf4jtest.LoggingEvent;
+import uk.org.lidalia.slf4jtest.TestLogger;
+import uk.org.lidalia.slf4jtest.TestLoggerFactory;
+import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,9 +24,18 @@ import static de.triology.versionname.VersionNames.DEFAULT_MANIFEST_PATH;
 import static de.triology.versionname.VersionNames.DEFAULT_PROPERTIES_FILE_PATH;
 import static de.triology.versionname.VersionNames.DEFAULT_PROPERTY;
 import static de.triology.versionname.VersionNames.VERSION_STRING_ON_ERROR;
+import static de.triology.versionname.VersionNames.VersionName.LOG_EXCEPTION_ON_CLOSE;
+import static de.triology.versionname.VersionNames.VersionName.LOG_EXCEPTION_READING_FROM_RESOURCE;
+import static de.triology.versionname.VersionNames.VersionName.LOG_KEY_NULL;
+import static de.triology.versionname.VersionNames.VersionName.LOG_NOT_FOUND_IN_RESOURCE;
+import static de.triology.versionname.VersionNames.VersionName.LOG_RESOURCE_NOT_FOUND;
+import static de.triology.versionname.VersionNames.VersionName.LOG_RESOURCE_PATH_NULL;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +49,16 @@ public class VersionNamesTest {
      */
     private ClassLoader classLoader = mock(ClassLoader.class);
 
+    /**
+     * Logger of class under test.
+     */
+    private static final TestLogger LOG = TestLoggerFactory.getTestLogger(VersionNames.class);
+
+    /**
+     * Rest logger before each test.
+     **/
+    @Rule public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
+
     @Before
     public void setUp() throws Exception {
         // Inject mocked class into static field
@@ -41,7 +66,7 @@ public class VersionNamesTest {
     }
 
     /**
-     * Test for {@link VersionNames#getVersionNameFromProperties()}, for specific properties file and property.
+     * Test for {@link VersionNames#getVersionNameFromProperties(String, String)}, for specific properties file and property.
      */
     @Test
     public void testGetVersionNameFromPropertiesNonDefault() throws Exception {
@@ -58,6 +83,45 @@ public class VersionNamesTest {
         // Assertions
         assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
         verify(classLoader).getResourceAsStream(expectedPath);
+    }
+
+    /**
+     * Test for {@link VersionNames#getVersionNameFromProperties(String, String)}, where the property parameter is
+     * <code>null</code>
+     */
+    @Test
+    public void testGetVersionNameFromPropertiesPropertyNull() throws Exception {
+        String expectedPath = "path";
+        ByteArrayInputStream resourceStream = new ByteArrayInputStream(("someProperty=42").getBytes());
+        when(classLoader.getResourceAsStream(expectedPath)).thenReturn(resourceStream);
+
+        // Call method under test
+        String actualVersionName = VersionNames.getVersionNameFromProperties(expectedPath, null);
+
+        // Assertions
+        assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_KEY_NULL, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
+    }
+
+    /**
+     * Test for {@link VersionNames#getVersionNameFromProperties(String, String)}, where the path parameter is
+     * <code>null</code>
+     */
+    @Test
+    public void testGetVersionNameFromPropertiesPathNull() throws Exception {
+        // Use real class loader
+        setVersionNamesClassLoader(VersionNames.class.getClassLoader());
+
+        // Call method under test
+        String actualVersionName = VersionNames.getVersionNameFromProperties(null, "someProperty");
+
+        // Assertions
+        assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_RESOURCE_PATH_NULL, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
 
     /**
@@ -90,6 +154,9 @@ public class VersionNamesTest {
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_RESOURCE_NOT_FOUND, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
 
     /**
@@ -106,10 +173,14 @@ public class VersionNamesTest {
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_EXCEPTION_READING_FROM_RESOURCE, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
 
     /**
-     * Test for {@link VersionNames#getVersionNameFromProperties(String, String)}, the property is <code>null</code>
+     * Test for {@link VersionNames#getVersionNameFromProperties(String, String)}, where the property is
+     * <code>null</code>.
      */
     @Test
     public void testGetVersionNameFromPropertiesResourcePropertyNull() throws Exception {
@@ -121,6 +192,9 @@ public class VersionNamesTest {
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_NOT_FOUND_IN_RESOURCE, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
 
     /**
@@ -129,15 +203,23 @@ public class VersionNamesTest {
      */
     @Test
     public void testGetVersionNameFromPropertiesResourceIOExceptionOnClose() throws Exception {
-        InputStream resourceStream = mock(InputStream.class);
-        doThrow(new IOException("Mocked exception")).when(resourceStream).close();
+        String expectedVersionName = "42L";
+        ByteArrayInputStream resourceStream =
+            new ByteArrayInputStream((DEFAULT_PROPERTY + "=" + expectedVersionName).getBytes());
         when(classLoader.getResourceAsStream(DEFAULT_PROPERTIES_FILE_PATH)).thenReturn(resourceStream);
+
+        InputStream resourceStreamSpy = spy(resourceStream);
+        doThrow(new IOException("Mocked exception")).when(resourceStreamSpy).close();
+        when(classLoader.getResourceAsStream(DEFAULT_PROPERTIES_FILE_PATH)).thenReturn(resourceStreamSpy);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromProperties();
 
         // Assertions
-        assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_EXCEPTION_ON_CLOSE, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.WARN, logEvent.getLevel());
     }
 
     /**
@@ -157,6 +239,45 @@ public class VersionNamesTest {
         // Assertions
         assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
         verify(classLoader).getResourceAsStream(expectedPath);
+    }
+
+    /**
+     * Test for {@link VersionNames#getVersionNameFromManifest(String, String)}, where the attribute parameter is
+     * <code>null</code>
+     */
+    @Test
+    public void testGetVersionNameFromManifestParameterAttributeNull() throws Exception {
+        String expectedPath = "path";
+        ByteArrayInputStream resourceStream = createManifest("someAttribute", "42");
+        when(classLoader.getResourceAsStream(expectedPath)).thenReturn(resourceStream);
+
+        // Call method under test
+        String actualVersionName = VersionNames.getVersionNameFromManifest(expectedPath, null);
+
+        // Assertions
+        assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_KEY_NULL, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
+    }
+
+    /**
+     * Test for {@link VersionNames#getVersionNameFromManifest(String, String)}, where the path parameter is
+     * <code>null</code>
+     */
+    @Test
+    public void testGetVersionNameFromManifestParameterPathNull() throws Exception {
+        // Use real class loader
+        setVersionNamesClassLoader(VersionNames.class.getClassLoader());
+
+        // Call method under test
+        String actualVersionName = VersionNames.getVersionNameFromManifest(null, "someProperty");
+
+        // Assertions
+        assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_RESOURCE_PATH_NULL, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
 
     /**
@@ -180,7 +301,7 @@ public class VersionNamesTest {
      * <code>null</code>.
      */
     @Test
-    public void testGetVersionNameFromManifestManifestNull() throws Exception {
+    public void testGetVersionNameFromManifestResourceNull() throws Exception {
         when(classLoader.getResourceAsStream(DEFAULT_MANIFEST_PATH)).thenReturn(null);
 
         // Call method under test
@@ -188,6 +309,9 @@ public class VersionNamesTest {
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_RESOURCE_NOT_FOUND, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
 
     /**
@@ -204,6 +328,9 @@ public class VersionNamesTest {
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_EXCEPTION_READING_FROM_RESOURCE, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
 
     /**
@@ -219,6 +346,9 @@ public class VersionNamesTest {
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_NOT_FOUND_IN_RESOURCE, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
 
     /**
@@ -236,6 +366,9 @@ public class VersionNamesTest {
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_EXCEPTION_ON_CLOSE, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.WARN, logEvent.getLevel());
     }
 
     /**
@@ -259,6 +392,14 @@ public class VersionNamesTest {
         field.setAccessible(true);
 
         field.set(null, classLoader);
+    }
+
+    /**
+     * @return the logging event at <code>index</code>
+     */
+    public LoggingEvent getLogEvent(int index) {
+        assertThat("Unexpected number of Log messages", LOG.getLoggingEvents().size(), greaterThan(index));
+        return LOG.getLoggingEvents().get(index);
     }
 
     /**

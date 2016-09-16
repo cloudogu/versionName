@@ -1,5 +1,8 @@
 package de.triology.versionname;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -10,6 +13,8 @@ import java.util.jar.Manifest;
  * Provides access to a version names written to files such as the manifest or a properties file.
  */
 public class VersionNames {
+
+    private static final Logger LOG = LoggerFactory.getLogger(VersionNames.class);
 
     /**
      * The path of the properties file that is used for looking up the version name by default.
@@ -66,23 +71,24 @@ public class VersionNames {
      * @param property           property within <code>propertiesFilePath</code> that is used for looking up the version name
      * @return the version name or empty string if anything goes wrong. In case of error, see log for details.
      */
-    public static String getVersionNameFromProperties(String propertiesFilePath, final String property) {
+    public static String getVersionNameFromProperties(String propertiesFilePath, String property) {
         return new VersionName() {
             @Override
-            protected String handleResourceStream(InputStream resourceAsStream) throws IOException {
+            protected String handleResourceStream(InputStream resourceAsStream, String key) throws IOException {
                 Properties props = new Properties();
 
                 props.load(resourceAsStream);
-                Object versionNameObject = props.get(property);
+                Object versionNameObject = props.get(key);
                 // Properties.get() seems to always return strings. But: In theory, it could return any other object.
                 if (versionNameObject instanceof String) {
                     return (String) versionNameObject;
                 } else if (versionNameObject != null) {
                     return versionNameObject.toString();
+                } else {
+                    return null;
                 }
-                return null;
             }
-        }.fromResource(propertiesFilePath);
+        }.fromResource(propertiesFilePath, property);
     }
 
     /**
@@ -102,43 +108,61 @@ public class VersionNames {
      * @param attribute        attribute within <code>manifestFilePath</code> that is used for looking up the version name
      * @return the version name or empty string if anything goes wrong. In case of error, see log for details.
      */
-    public static String getVersionNameFromManifest(String manifestFilePath, final String attribute) {
+    public static String getVersionNameFromManifest(String manifestFilePath, String attribute) {
         return new VersionName() {
             @Override
-            protected String handleResourceStream(InputStream resourceAsStream) throws IOException {
+            protected String handleResourceStream(InputStream resourceAsStream, String key) throws IOException {
                 Manifest manifest = new Manifest(resourceAsStream);
                 Attributes attributes = manifest.getMainAttributes();
-                return attributes.getValue(attribute);
+                return attributes.getValue(key);
             }
-        }.fromResource(manifestFilePath);
+        }.fromResource(manifestFilePath, attribute);
     }
 
-    // TODO Logging
-
     /**
-     * Handles the generic part of version number loading. Gets specific resource stream from classloader and takes care of
-     * the error handling and stream closing.
+     * Handles the generic part of version number loading. Gets specific resource stream from classloader and takes care
+     * of the error handling, logging and stream closing.
+     * <p>Concrete classes need to implement the logic for getting the resource stream in
+     * {@link #handleResourceStream(InputStream, String)}.</p>
      */
-    private abstract static class VersionName {
-        public String fromResource(String resourcePath) {
+    abstract static class VersionName {
+        static final String LOG_RESOURCE_NOT_FOUND = "Cannot read version name. Resource \"{}\" not found on classpath";
+        static final String LOG_KEY_NULL = "Cannot read version name from resource. Key is null";
+        static final String LOG_RESOURCE_PATH_NULL = "Cannot read version name. Resource path is null";
+        static final String LOG_NOT_FOUND_IN_RESOURCE = "Version name not found in {}";
+        static final String LOG_EXCEPTION_READING_FROM_RESOURCE = "Exception while reading version name from {}";
+        static final String LOG_EXCEPTION_ON_CLOSE = "Unable to close resource stream after reading version number";
+
+        /**
+         * Template method that implements the actual version number logic.
+         *
+         * @param resourceStream the resource to load the version number from. Never <code>null</code>
+         * @param key            the key within the resource stream. Never <code>null</code>
+         * @return the version number, or <code>null</code>, if none found
+         * @throws IOException - if an I/O error has occurred
+         */
+        protected abstract String handleResourceStream(InputStream resourceStream, String key) throws IOException;
+
+        /**
+         * Get the version name from the specified <code>resourcePath</code> at the specified <code>key</code>.
+         *
+         * @param resourcePath path to the resource to open from classpath, relative to this class. Can be <code>null</code>
+         * @param key          the key within the resource stream. Can be <code>null</code>
+         * @return the version number or {@link #VERSION_STRING_ON_ERROR}, if none found. Never <code>null</code>
+         */
+        public String fromResource(String resourcePath, String key) {
             String versionName = VERSION_STRING_ON_ERROR;
-            InputStream resourceAsStream = classLoader.getResourceAsStream(resourcePath);
-            try {
-                if (resourceAsStream != null) {
-                    versionName = handleResourceStream(resourceAsStream);
-                }
-            } catch (IOException e) {
-                // TODO log
-            } finally {
-                if (resourceAsStream != null) {
-                    try {
-                        resourceAsStream.close();
-                    } catch (IOException e) {
-                        // TODO log
-                    }
-                }
+            if (resourcePath == null) {
+                LOG.error(LOG_RESOURCE_PATH_NULL);
+            } else if (key == null) {
+                LOG.error(LOG_KEY_NULL);
+            } else {
+                versionName = processResource(resourcePath, key);
             }
+
+            // Never return null
             if (versionName == null) {
+                LOG.error(LOG_NOT_FOUND_IN_RESOURCE, resourcePath);
                 versionName = VERSION_STRING_ON_ERROR;
             }
 
@@ -146,13 +170,31 @@ public class VersionNames {
         }
 
         /**
-         * Template method that implements the actual version number logic.
-         *
-         * @param resourceAsStream the resource to load the version number from
-         * @return the version number, or <code>null</code>, if none.
-         * @throws IOException - if an I/O error has occurred
+         * Actual logic for opening and closing the stream. Calls template method
+         * {@link #handleResourceStream(InputStream, String)}.
          */
-        protected abstract String handleResourceStream(InputStream resourceAsStream) throws IOException;
+        private String processResource(String resourcePath, String key) {
+            // Actual reading logic
+            InputStream resourceStream = classLoader.getResourceAsStream(resourcePath);
+            try {
+                if (resourceStream != null) {
+                    return handleResourceStream(resourceStream, key);
+                } else {
+                    LOG.error(LOG_RESOURCE_NOT_FOUND, resourcePath);
+                }
+            } catch (IOException e) {
+                LOG.error(LOG_EXCEPTION_READING_FROM_RESOURCE, resourcePath, e);
+            } finally {
+                if (resourceStream != null) {
+                    try {
+                        resourceStream.close();
+                    } catch (IOException e) {
+                        LOG.warn(LOG_EXCEPTION_ON_CLOSE, e);
+                    }
+                }
+            }
+            return null;
+        }
     }
 }
 

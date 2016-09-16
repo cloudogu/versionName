@@ -81,6 +81,19 @@
                     <shortRevisionLength>7</shortRevisionLength>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <!-- Keep as much compatibility as possible... -->
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <!--... but make life better for testing -->
+                    <testSource>1.8</testSource>
+                    <testTarget>1.8</testTarget>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
