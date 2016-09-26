@@ -62,7 +62,7 @@
                             <version>${versionName}</version>
                         </manifestEntries>
                     </archive>
-                    <!-- Filter for build number in html-->
+                    <!-- Filter for version name in html-->
                     <webResources>
                         <resource>
                             <directory>src/main/webapp</directory>
