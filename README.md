@@ -4,7 +4,7 @@ versionName
 Examples on how to generate an extended version name with maven containing
 - the version,
 - the build date,
-- branch and
+- branch,
 - commit hash
 - e.g. ``1.0-SNAPSHOT (2016-09-16 14:12, branch master, commit 0f300dd)``
 
@@ -12,6 +12,8 @@ Also shows how to read it from within applications (JAR or WAR), using different
  - Manifest,
  - property or
  - HTML
+ 
+These examples have been testes with Maven 3.3.9.
 
 ## Build and run examples
 - ``mvn clean package``
