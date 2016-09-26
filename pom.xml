@@ -44,7 +44,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Printable Version number -->
+        <!-- Printable version name -->
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <!-- See also "versionNameBuildNumber" profile and buildnumber-maven-plugin-->
         <versionName>${project.version} (${maven.build.timestamp}, branch ${scmBranch}, commit ${buildNumber})
