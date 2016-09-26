@@ -42,7 +42,7 @@
 
         <resources>
             <resource>
-                <!-- Filter for build number in properties -->
+                <!-- Filter for version name in properties -->
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
