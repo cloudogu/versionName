@@ -72,7 +72,7 @@
                 </executions>
                 <configuration>
                     <archive>
-                        <!-- Add build number to manifest -->
+                        <!-- Add version name to manifest -->
                         <manifestEntries>
                             <versionName>${versionName}</versionName>
                         </manifestEntries>
