@@ -65,8 +65,9 @@
             </properties>
         </profile>
         <profile>
-            <!--For releases only use the version number, don't add timestamp, build number, etc. -->
-            <id>versionNameBuildNumberForRelease</id>
+            <!-- For releases, use a simple version name, consisting of the version number.
+                 don't add timestamp, SCM info, build number, etc. -->
+            <id>versionNameForRelease</id>
             <activation>
                 <property>
                     <name>performRelease</name>
