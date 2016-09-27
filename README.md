@@ -5,20 +5,24 @@ Examples on how to generate an extended version name with maven containing
 - the version,
 - the build date,
 - branch,
-- commit hash and
-- build number.
+- commit hash,
+- build number
+- (and a special version name for releases)
 - e.g. ``1.0-SNAPSHOT build #17 (2016-09-27T07:55:43Z, branch master, commit 4dd3cf5)``
 
 See [parent pom.xml](pom.xml)
+
 The build number is only written to version name, when the environment variable ``BUILD_NUMBER`` is defined. This works automatically in Jenkins, for example (see [Jenkinsfile](Jenkinsfile)).
 
+For releases a simple version name containing only the version number is created. This is activated using the property ``performRelease``. This is for example set when using the ``release:perform`` goal of the [maven-release-plugin](http://maven.apache.org/maven-release/maven-release-plugin), or can be set like so: ``mvn clean install -DperformRelease``.
 
-These example also show how to read it from within applications (JAR or WAR), using different ways of reading the version name:
+
+The example also shows how to read the version name from within applications (JAR or WAR), using different ways of reading the version name:
  - Manifest,
- - property or
- - HTML
+ - property file or
+ - HTML.
 
-These examples have been testes with Maven 3.3.9.
+The example have been testes with Maven 3.3.9 and should work with Java 1.6+.
 
 ## Build and run examples
 - ``mvn clean package``

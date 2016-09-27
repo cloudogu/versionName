@@ -64,6 +64,18 @@
                 <!-- @formatter:on -->
             </properties>
         </profile>
+        <profile>
+            <!--For releases only use the version number, don't add timestamp, build number, etc. -->
+            <id>versionNameBuildNumberForRelease</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                </property>
+            </activation>
+            <properties>
+                <versionName>${project.version}</versionName>
+            </properties>
+        </profile>
     </profiles>
 
     <build>
