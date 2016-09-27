@@ -15,7 +15,7 @@ node { // No specific label
         }
 
         stage('Print version number') {
-            java "-jar ${pwd()}/jar/target/jar-${mavenVersion()}-jar-with-dependencies.jar"
+            java "-jar jar/target/jar-${mavenVersion()}-jar-with-dependencies.jar"
         }
     }
     //step([$class: 'Mailer', recipients: 'a@b.c', notifyEveryUnstableBuild: true, sendToIndividuals: true])
