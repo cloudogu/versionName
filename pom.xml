@@ -51,7 +51,7 @@
     <profiles>
         <profile>
             <!-- Profile that extends the printable version number by an optional build.
-                It is activated when a environment variable called BUILD_NUMBER exists (as in Jenkins) -->
+                It is activated when an environment variable called BUILD_NUMBER exists (as in Jenkins) -->
             <id>versionNameBuildNumber</id>
             <activation>
                 <property>
