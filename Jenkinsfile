@@ -40,7 +40,9 @@ def mvn(def args) {
 }
 
 def java(def args) {
-    sh "${javaHome}/jre/bin/java ${args}"
+    withEnv(["PATH=${javaHome}/jre/bin"+':$PATH']) {
+        sh "java ${args}"
+    }
 }
 
 def mavenVersion() {
