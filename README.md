@@ -47,3 +47,9 @@ The example have been testes with Maven 3.3.9 and should work with Java 1.6+.
 - HTML see [index.html](war/src/main/webapp/index.html)
 - Run it: ``java -jar server/target/server-1.0-SNAPSHOT-jar-with-dependencies.jar``
   [http://localhost:8080](http://localhost:8080)
+
+# Jenkins
+Running [Jenkinsfile](Jenkinsfile) with the [pipeline plugin](https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Plugin) (tested with version 2.4) requires
+- A JDK defined as  Jenkins tool (see [Jenkinsfile](Jenkinsfile) for name of JDK tool)
+- Maven defined as Jenkins tool (see [Jenkinsfile](Jenkinsfile) for name of Maven tool)
+- Optional: You can add a build parameter `RECIPIENTS` that contains a comma-separated list of all email recipients

@@ -18,7 +18,8 @@ node { // No specific label
             java "-jar jar/target/jar-${mavenVersion()}-jar-with-dependencies.jar"
         }
     }
-    //step([$class: 'Mailer', recipients: 'a@b.c', notifyEveryUnstableBuild: true, sendToIndividuals: true])
+    // Send mail on failure
+    step([$class: 'Mailer', recipients: '$RECIPIENTS', notifyEveryUnstableBuild: true, sendToIndividuals: true])
 }
 
 def mvnHome
