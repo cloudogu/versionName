@@ -18,6 +18,8 @@ node { // No specific label
             java "-jar jar/target/jar-${mavenVersion()}-jar-with-dependencies.jar"
         }
     }
+    // Archive JUnit results, if any
+    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
     // Send mail on failure
     step([$class: 'Mailer', recipients: '$RECIPIENTS', notifyEveryUnstableBuild: true, sendToIndividuals: true])
 }
