@@ -6,11 +6,11 @@ versionName is a tiny Java library that allows for conveniently reading the vers
  - Manifest or
  - property file.
 
-It consists of one class (as said before it's tiny) [VersionNames](versionName/src/main/java/de/triology/versionName/VersionNames.java) that provides methods for reading the version name.
+It consists of one class (as said before it's tiny) [VersionNames](versionName/src/main/java/de/triology/versionname/VersionNames.java) that provides methods for reading the version name.
 The public methods return a String that is never `null`. In case of error, messages are written to a [SLF4J](http://slf4j.org/)-logger.
 
-- [VersionNames.getVersionNameFromProperties()](../versionName/src/main/java/de/triology/versionname/VersionNames.java),
-- [VersionNames.getVersionNameFromManifest()](../versionName/src/main/java/de/triology/versionname/VersionNames.java)
+- [VersionNames.getVersionNameFromProperties()](versionName/src/main/java/de/triology/versionname/VersionNames.java),
+- [VersionNames.getVersionNameFromManifest()](versionName/src/main/java/de/triology/versionname/VersionNames.java)
 
 # Examples
 The examples show how to write a version name to your application using maven and how it can be read using the library from within applications (JAR or WAR).
