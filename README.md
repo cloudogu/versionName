@@ -1,5 +1,6 @@
 versionName
 ===========
+[![](https://jitpack.io/v/triologygmbh/versionName.svg)](https://jitpack.io/#triologygmbh/versionName)
 
 versionName is a tiny Java library that allows for conveniently reading the version name of an application from
 
@@ -11,6 +12,26 @@ The public methods return a String that is never `null`. In case of error, messa
 
 - [VersionNames.getVersionNameFromProperties()](versionName/src/main/java/de/triology/versionname/VersionNames.java),
 - [VersionNames.getVersionNameFromManifest()](versionName/src/main/java/de/triology/versionname/VersionNames.java)
+
+To use versionName, either copy [VersionNames](versionName/src/main/java/de/triology/versionName/VersionNames.java) to your classpath or use the dependency resolution tool of your choice.
+With maven for example, add the jitpack repo
+
+```XML
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+```
+and the versionName dependency
+```XML
+<dependency>
+    <groupId>com.github.triologygmbh.versionName</groupId>
+    <artifactId>versionName</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 
 # Examples
 The examples show how to write a version name to your application using maven and how it can be read using the library from within applications (JAR or WAR).
