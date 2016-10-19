@@ -33,7 +33,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 /**
- * Provides access to a version names written to files such as the manifest or a properties file.
+ * Provides access to version names written to files such as the manifest or a properties file.
  */
 public class VersionNames {
 

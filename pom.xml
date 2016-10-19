@@ -33,7 +33,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>versionName</name>
+    <name>versionName-parent</name>
     <url>https://github.com/triologygmbh/versionName</url>
 
     <scm>
@@ -42,75 +42,8 @@
         <url>https://github.com/triologygmbh/versionName.git</url>
     </scm>
 
-    <properties>
-        <!-- Printable version name -->
-        <versionName>${project.version} (${maven.build.timestamp}, branch ${scmBranch}, commit ${buildNumber})
-        </versionName>
-    </properties>
-
-    <profiles>
-        <profile>
-            <!-- Profile that extends the printable version number by an optional build.
-                It is activated when an environment variable called BUILD_NUMBER exists (as in Jenkins) -->
-            <id>versionNameBuildNumber</id>
-            <activation>
-                <property>
-                    <name>env.BUILD_NUMBER</name>
-                </property>
-            </activation>
-            <properties>
-                <!-- @formatter:off -->
-                <versionName>${project.version} build #${env.BUILD_NUMBER} (${maven.build.timestamp}, branch ${scmBranch}, commit ${buildNumber})</versionName>
-                <!-- @formatter:on -->
-            </properties>
-        </profile>
-        <profile>
-            <!-- For releases, use a simple version name, consisting of the version number.
-                 don't add timestamp, SCM info, build number, etc. -->
-            <id>versionNameForRelease</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                </property>
-            </activation>
-            <properties>
-                <versionName>${project.version}</versionName>
-            </properties>
-        </profile>
-    </profiles>
-
-    <build>
-        <plugins>
-            <!-- Write the current git revision into ${buildnumber} and populate ${scmBranch} -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <!-- Get the scm revision once for all modules -->
-                    <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
-                    <!-- Don't fail on modified local resources -->
-                    <doCheck>false</doCheck>
-                    <!-- Don't update SCM -->
-                    <doUpdate>false</doUpdate>
-                    <!-- Use short version of git revision -->
-                    <shortRevisionLength>7</shortRevisionLength>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
     <modules>
-        <module>jar</module>
-        <module>war</module>
-        <module>server</module>
         <module>versionName</module>
+        <module>examples</module>
     </modules>
 </project>

@@ -30,77 +30,76 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>de.triology.versionName</groupId>
-        <artifactId>versionName-parent</artifactId>
+        <artifactId>versionName-examples</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jar</artifactId>
-    <name>jar</name>
-
-    <packaging>jar</packaging>
-
-    <properties>
-        <mainClass>de.triology.versionname.App</mainClass>
-    </properties>
-
+    <artifactId>war</artifactId>
+    <packaging>war</packaging>
+    <name>versionName-examples-war</name>
     <build>
+        <finalName>war</finalName>
+
+        <resources>
+            <resource>
+                <!-- Filter for version name in properties -->
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>app.properties</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.0.0</version>
                 <configuration>
                     <archive>
-                        <manifest>
-                            <mainClass>${mainClass}</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <!-- Build a jar that contains the dependency to versionName module, to keep it simple -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.6</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <archive>
-                        <!-- Add version name to manifest -->
                         <manifestEntries>
-                            <versionName>${versionName}</versionName>
+                            <version>${versionName}</version>
                         </manifestEntries>
-                        <manifest>
-                            <mainClass>${mainClass}</mainClass>
-                        </manifest>
                     </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <!-- Filter for version name in html-->
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                            <includes>
+                                <include>index.html</include>
+                            </includes>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
     <dependencies>
+        <!-- JAX RS -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-servlet-initializer</artifactId>
+            <version>3.0.19.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+            <version>3.0.19.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
         <!-- Load version name from file -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>versionName</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
-
-        <!-- Don't use logging here-->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-nop</artifactId>
-            <version>1.7.21</version>
         </dependency>
     </dependencies>
 </project>

@@ -15,7 +15,7 @@ node { // No specific label
         }
 
         stage('Print version number') {
-            java "-jar jar/target/jar-${mavenVersion()}-jar-with-dependencies.jar"
+            java "-jar examples/jar/target/jar-${mavenVersion()}-jar-with-dependencies.jar"
         }
     }
     // Archive JUnit results, if any
