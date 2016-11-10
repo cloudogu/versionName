@@ -21,7 +21,7 @@ node { // No specific label
     // Archive JUnit results, if any
     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
     // Send mail on failure
-    step([$class: 'Mailer', recipients: $RECIPIENTS, notifyEveryUnstableBuild: true, sendToIndividuals: true])
+    step([$class: 'Mailer', recipients: env.RECIPIENTS, notifyEveryUnstableBuild: true, sendToIndividuals: true])
 }
 
 def mvnHome
