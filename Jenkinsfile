@@ -4,6 +4,11 @@ node { // No specific label
 
     mvnHome = tool 'M3.3'
     javaHome = tool 'JDK8u102'
+    
+    properties(
+    [parameters([
+        string(name: 'RECIPIENTS', defaultValue: '', description: 'Recipients for emails sent when a build fails')
+    ])])
    
     catchError {
         stage('Checkout') {
@@ -21,7 +26,7 @@ node { // No specific label
     // Archive JUnit results, if any
     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
     // Send mail on failure
-    step([$class: 'Mailer', recipients: '$RECIPIENTS', notifyEveryUnstableBuild: true, sendToIndividuals: true])
+    step([$class: 'Mailer', recipients: params.RECIPIENTS, notifyEveryUnstableBuild: true, sendToIndividuals: true])
 }
 
 def mvnHome
