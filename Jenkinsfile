@@ -4,10 +4,10 @@ node { // No specific label
 
     mvnHome = tool 'M3.3'
     javaHome = tool 'JDK8u102'
-
+   
     catchError {
         stage('Checkout') {
-            git 'https://github.com/triologygmbh/versionName'
+            checkout scm
         }
 
         stage('Build') {
