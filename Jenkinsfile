@@ -2,8 +2,8 @@
 
 node { // No specific label
 
-    mvnHome = tool 'M3.3'
-    javaHome = tool 'JDK8u102'
+    mvnHome = tool 'M3'
+    javaHome = tool 'JDK8'
    
     catchError {
         stage('Checkout') {
