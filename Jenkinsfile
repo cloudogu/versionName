@@ -43,7 +43,7 @@ def mvn(def args) {
 }
 
 def java(def args) {
-    withEnv(["PATH=${javaHome}/jre/bin"+':$PATH']) {
+    withEnv(["PATH+EXTRA=${javaHome}/jre/bin"]) {
         sh "java ${args}"
     }
 }
