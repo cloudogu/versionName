@@ -1,6 +1,6 @@
 versionName
 ===========
-[![Build Status](https://opensource.triology.de/jenkins/buildStatus/icon?job=triologygmbh-github/versionName/master)](https://opensource.triology.de/jenkins/job/triologygmbh-github/job/versionName/job/master/)
+[![Build Status](https://opensource.triology.de/jenkins/buildStatus/icon?job=triologygmbh-github/versionName/master)](https://opensource.triology.de/jenkins/blue/organizations/jenkins/triologygmbh-github%2FversionName/branches/)
 [![Current Version jitpack](https://jitpack.io/v/triologygmbh/versionName.svg)](https://jitpack.io/#triologygmbh/versionName)
 
 
