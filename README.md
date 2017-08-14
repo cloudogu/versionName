@@ -1,6 +1,9 @@
 versionName
 ===========
-[![](https://jitpack.io/v/triologygmbh/versionName.svg)](https://jitpack.io/#triologygmbh/versionName)
+[![Build Status](https://opensource.triology.de/jenkins/buildStatus/icon?job=triologygmbh-github/versionName/master)
+[![Current Version jitpack](https://jitpack.io/v/triologygmbh/versionName.svg)](https://jitpack.io/#triologygmbh/versionName)
+
+
 
 versionName is a tiny Java library that allows for conveniently reading the version name of an application from
 
