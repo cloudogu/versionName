@@ -28,8 +28,6 @@ node { // No specific label
         stage('Deploy') {
             if (preconditionsForDeploymentFulfilled()) {
 
-                mvn.additionalArgs += ' -pl versionName ' // Deploy only the lib itself
-
                 mvn.setDeploymentRepository('ossrh', 'https://oss.sonatype.org/', 'de.triology-mavenCentral-acccessToken')
 
                 mvn.setSignatureCredentials('de.triology-mavenCentral-secretKey-asc-file',
