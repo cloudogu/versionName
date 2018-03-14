@@ -34,6 +34,33 @@
 
     <name>versionName-parent</name>
     <url>https://github.com/triologygmbh/versionName</url>
+    <description>A tiny Java library that allows for conveniently reading the version name of an application </description>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://github.com/triologygmbh/command-bus/blob/master/LICENSE</url>
+        </license>
+    </licenses>
+
+    <inceptionYear>2017</inceptionYear>
+
+    <organization>
+        <name>TRIOLOGY GmbH</name>
+        <url>https://www.triology.de/</url>
+    </organization>
+
+    <developers>
+
+        <developer>
+            <name>Johannes Schnatterer</name>
+            <email>johannes.schnatterer@triology.de</email>
+            <organization>TRIOLOGY GmbH</organization>
+            <organizationUrl>https://www.triology.de/</organizationUrl>
+            <timezone>Europe/Berlin</timezone>
+        </developer>
+
+    </developers>
 
     <scm>
         <connection>scm:git:https://github.com/triologygmbh/versionName</connection>
