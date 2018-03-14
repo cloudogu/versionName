@@ -1,46 +1,51 @@
 #!groovy
+@Library('github.com/cloudogu/ces-build-lib@b5ce9f1')
+import com.cloudogu.ces.cesbuildlib.*
 
 node { // No specific label
 
-    mvnHome = tool 'M3'
+    def mvnHome = tool 'M3'
     javaHome = tool 'JDK8'
-   
+
+    Maven mvn = new MavenLocal(this, mvnHome, javaHome)
+
     catchError {
+
         stage('Checkout') {
             checkout scm
         }
+
+        initMaven(mvn)
 
         stage('Build') {
             mvn 'clean install'
         }
 
         stage('Print version number') {
-            java "-jar examples/jar/target/jar-${mavenVersion()}-jar-with-dependencies.jar"
+            java "-jar examples/jar/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
+        }
+
+        stage('Deploy') {
+            if (preconditionsForDeploymentFulfilled()) {
+
+                mvn.additionalArgs += ' -pl versionName ' // Deploy only the lib itself
+
+                mvn.setDeploymentRepository('ossrh', 'https://oss.sonatype.org/', 'de.triology-mavenCentral-acccessToken')
+
+                mvn.setSignatureCredentials('de.triology-mavenCentral-secretKey-asc-file',
+                    'de.triology-mavenCentral-secretKey-Passphrase')
+
+                mvn.deployToNexusRepositoryWithStaging()
+            }
         }
     }
     // Archive JUnit results, if any
     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
-    // Send mail on failure
-    step([$class: 'Mailer', recipients: env.RECIPIENTS, notifyEveryUnstableBuild: true, sendToIndividuals: true])
+
+    mailIfStatusChanged(findEmailRecipients(env.EMAIL_RECIPIENTS))
 }
 
-def mvnHome
 def javaHome
-
-def mvn(def args) {
-    // Apache Maven related side notes:
-    // --batch-mode : recommended in CI to inform maven to not run in interactive mode (less logs)
-    // -V : strongly recommended in CI, will display the JDK and Maven versions in use.
-    //      Very useful to be quickly sure the selected versions were the ones you think.
-    // -U : force maven to update snapshots each time (default : once an hour, makes no sense in CI).
-    // -Dsurefire.useFile=false : useful in CI. Displays test errors in the logs directly (instead of
-    //                            having to crawl the workspace files to see the cause).
-
-    // Advice: don't define M2_HOME in general. Maven will autodetect its root fine.
-    withEnv(["JAVA_HOME=${javaHome}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin"]) {
-        sh "${mvnHome}/bin/mvn ${args} --batch-mode -V -U -e -Dsurefire.useFile=false"
-    }
-}
 
 def java(def args) {
     withEnv(["PATH+EXTRA=${javaHome}/jre/bin"]) {
@@ -48,7 +53,34 @@ def java(def args) {
     }
 }
 
-def mavenVersion() {
-    def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
-    matcher ? matcher[0][1] : null
+boolean preconditionsForDeploymentFulfilled() {
+    if (isBuildSuccessful() &&
+        !isPullRequest() &&
+        shouldBranchBeDeployed()) {
+        return true
+    } else {
+        echo "Skipping deployment because of branch or build result: currentResult=${currentBuild.currentResult}, " +
+            "result=${currentBuild.result}, branch=${env.BRANCH_NAME}."
+        return false
+    }
+}
+
+private boolean shouldBranchBeDeployed() {
+    return env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop'
+}
+
+private boolean isBuildSuccessful() {
+    currentBuild.currentResult == 'SUCCESS' &&
+        // Build result == SUCCESS seems not to set be during pipeline execution.
+        (currentBuild.result == null || currentBuild.result == 'SUCCESS')
+}
+
+void initMaven(Maven mvn) {
+
+    if ("master".equals(env.BRANCH_NAME)) {
+
+        echo "Building master branch"
+        mvn.additionalArgs =+ " -DperformRelease "
+        currentBuild.description = mvn.getVersion()
+    }
 }
