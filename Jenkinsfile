@@ -80,7 +80,7 @@ void initMaven(Maven mvn) {
     if ("master".equals(env.BRANCH_NAME)) {
 
         echo "Building master branch"
-        mvn.additionalArgs =+ " -DperformRelease "
+        mvn.additionalArgs += " -DperformRelease "
         currentBuild.description = mvn.getVersion()
     }
 }
