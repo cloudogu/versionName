@@ -25,6 +25,20 @@ node { // No specific label
             java "-jar examples/jar/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
         }
 
+        stage('Statical Code Analysis') {
+            dir('versionName') { // Scan only the library module
+                def sonarQube = new SonarQube(this, 'sonarcloud.io')
+                sonarQube.updateAnalysisResultOfPullRequestsToGitHub('sonarqube-gh')
+                sonarQube.isUsingBranchPlugin = true
+
+                sonarQube.analyzeWith(mvn)
+
+                if (!sonarQube.waitForQualityGateWebhookToBeCalled()) {
+                    currentBuild.result = 'UNSTABLE'
+                }
+            }
+        }
+
         stage('Deploy') {
             if (preconditionsForDeploymentFulfilled()) {
 
