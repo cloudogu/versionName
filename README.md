@@ -1,9 +1,9 @@
 versionName
 ===========
-[![Build Status](https://opensource.triology.de/jenkins/buildStatus/icon?job=triologygmbh-github/versionName/master)](https://opensource.triology.de/jenkins/blue/organizations/jenkins/triologygmbh-github%2FversionName/branches/)
-[![Current Version jitpack](https://jitpack.io/v/triologygmbh/versionName.svg)](https://jitpack.io/#triologygmbh/versionName)
-
-
+[![Build Status](https://opensource.triology.de/jenkins/buildStatus/icon?job=triologygmbh-github/versionName/develop)](https://opensource.triology.de/jenkins/blue/organizations/jenkins/triologygmbh-github%2FversionName/branches/)
+[![Quality Gates](https://sonarcloud.io/api/badges/gate?key=de.triology.versionName%3AversionName)](https://sonarcloud.io/dashboard?id=de.triology.versionName%3AversionName)
+[![Coverage](https://sonarcloud.io/api/badges/measure?key=de.triology.versionName%3AversionName&metric=coverage)](https://sonarcloud.io/dashboard?id=de.triology.versionName%3AversionName)
+[![Technical Debt](https://sonarcloud.io/api/badges/measure?key=de.triology.versionName%3AversionName&metric=sqale_debt_ratio)](https://sonarcloud.io/dashboard?id=de.triology.versionName%3AversionName)
 
 versionName is a tiny Java library that allows for conveniently reading the version name of an application from
 
@@ -20,26 +20,29 @@ The public methods return a String that is never `null`. In case of error, messa
 - [VersionNames.getVersionNameFromProperties()](versionName/src/main/java/de/triology/versionname/VersionNames.java),
 - [VersionNames.getVersionNameFromManifest()](versionName/src/main/java/de/triology/versionname/VersionNames.java)
 
-To use versionName, either copy [VersionNames](versionName/src/main/java/de/triology/versionName/VersionNames.java) to your classpath or use the dependency resolution tool of your choice.
-With maven for example, add the jitpack repo
+To use versionName, either copy [VersionNames](versionName/src/main/java/de/triology/versionName/VersionNames.java) to your classpath or add the [latest stable version](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%20%22de.triology.versionName%22%20AND%20a%3A%22versionName%22) to the dependency management tool of your choice.
 
-```XML
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
-```
-and the versionName dependency
+With maven for example
 ```XML
 <dependency>
-    <groupId>com.github.triologygmbh.versionName</groupId>
+    <groupId>de.triology.versionName</groupId>
     <artifactId>versionName</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
+[![Maven Central](https://img.shields.io/maven-central/v/de.triology.versionName/versionName.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%20%22de.triology.versionName%22%20AND%20a%3A%22versionName%22)
+
+You can also get snapshot versions from our [snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/de/triology/versionName/versionName/) (for the most recent commit on develop branch).
+To do so, add the following repo to your `pom.xml` or `settings.xml`:
+```xml
+<repository>
+    <id>snapshots-repo</id>
+    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    <releases><enabled>false</enabled></releases>
+    <snapshots><enabled>true</enabled></snapshots>
+</repository>
+```
 # Examples
 The examples show how to write a version name to your application using maven and how it can be read using the library from within applications (JAR or WAR).
 See [examples/README.md](examples/README.md)
