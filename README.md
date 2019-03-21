@@ -1,9 +1,9 @@
 versionName
 ===========
 [![Build Status](https://opensource.triology.de/jenkins/buildStatus/icon?job=triologygmbh-github/versionName/develop)](https://opensource.triology.de/jenkins/blue/organizations/jenkins/triologygmbh-github%2FversionName/branches/)
-[![Quality Gates](https://sonarcloud.io/api/badges/gate?key=de.triology.versionName%3AversionName)](https://sonarcloud.io/dashboard?id=de.triology.versionName%3AversionName)
-[![Coverage](https://sonarcloud.io/api/badges/measure?key=de.triology.versionName%3AversionName&metric=coverage)](https://sonarcloud.io/dashboard?id=de.triology.versionName%3AversionName)
-[![Technical Debt](https://sonarcloud.io/api/badges/measure?key=de.triology.versionName%3AversionName&metric=sqale_debt_ratio)](https://sonarcloud.io/dashboard?id=de.triology.versionName%3AversionName)
+[![Quality Gates](https://sonarcloud.io/api/project_badges/measure?project=de.triology.versionName%3AversionName&metric=alert_status)](https://sonarcloud.io/dashboard?id=de.triology.versionName%3AversionName)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=de.triology.versionName%3AversionName&metric=coverage)](https://sonarcloud.io/dashboard?id=de.triology.versionName%3AversionName)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=de.triology.versionName%3AversionName&metric=sqale_index)](https://sonarcloud.io/dashboard?id=de.triology.versionName%3AversionName)
 
 versionName is a tiny Java library that allows for conveniently reading the version name of an application from
 
