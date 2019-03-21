@@ -25,6 +25,12 @@ node { // No specific label
             def actualVersionNumber = java "-jar examples/jar/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
             echo "Returned version number: ${actualVersionNumber}"
             assert actualVersionNumber.contains(mvn.version)
+
+            docker.image('openjdk:8u102-jre').inside {
+                actualVersionNumber = java "-jar examples/jar/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
+                echo "Returned version number: ${actualVersionNumber}"
+                assert actualVersionNumber.contains(mvn.version)
+            }
         }
 
         stage('Statical Code Analysis') {
