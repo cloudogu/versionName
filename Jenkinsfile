@@ -22,7 +22,9 @@ node { // No specific label
         }
 
         stage('Print version number') {
-            java "-jar examples/jar/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
+            def actualVersionNumber = java "-jar examples/jar/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
+            echo "Returned version number: ${actualVersionNumber}"
+            assert actualVersionNumber.contains(mvn.version)
         }
 
         stage('Statical Code Analysis') {
@@ -61,7 +63,7 @@ def javaHome
 
 def java(def args) {
     withEnv(["PATH+EXTRA=${javaHome}/jre/bin"]) {
-        sh "java ${args}"
+        return sh(returnStdout: true, script: "java ${args}")
     }
 }
 
