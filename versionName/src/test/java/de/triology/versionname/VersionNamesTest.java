@@ -42,25 +42,12 @@ import java.lang.reflect.Field;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import static de.triology.versionname.VersionNames.DEFAULT_MANIFEST_ATTRIBUTE;
-import static de.triology.versionname.VersionNames.DEFAULT_MANIFEST_PATH;
-import static de.triology.versionname.VersionNames.DEFAULT_PROPERTIES_FILE_PATH;
-import static de.triology.versionname.VersionNames.DEFAULT_PROPERTY;
-import static de.triology.versionname.VersionNames.VERSION_STRING_ON_ERROR;
-import static de.triology.versionname.VersionNames.VersionName.LOG_EXCEPTION_ON_CLOSE;
-import static de.triology.versionname.VersionNames.VersionName.LOG_EXCEPTION_READING_FROM_RESOURCE;
-import static de.triology.versionname.VersionNames.VersionName.LOG_KEY_NULL;
-import static de.triology.versionname.VersionNames.VersionName.LOG_NOT_FOUND_IN_RESOURCE;
-import static de.triology.versionname.VersionNames.VersionName.LOG_RESOURCE_NOT_FOUND;
-import static de.triology.versionname.VersionNames.VersionName.LOG_RESOURCE_PATH_NULL;
+import static de.triology.versionname.VersionNames.*;
+import static de.triology.versionname.VersionNames.VersionName.*;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link VersionNames}.
@@ -98,7 +85,7 @@ public class VersionNamesTest {
         String expectedVersionName = "42";
         ByteArrayInputStream resourceStream =
             new ByteArrayInputStream((expectedProperty + "=" + expectedVersionName).getBytes());
-        when(classLoader.getResourceAsStream(expectedPath)).thenReturn(resourceStream);
+        mockManifest(expectedPath, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromProperties(expectedPath, expectedProperty);
@@ -116,7 +103,7 @@ public class VersionNamesTest {
     public void testGetVersionNameFromPropertiesPropertyNull() throws Exception {
         String expectedPath = "path";
         ByteArrayInputStream resourceStream = new ByteArrayInputStream(("someProperty=42").getBytes());
-        when(classLoader.getResourceAsStream(expectedPath)).thenReturn(resourceStream);
+        mockManifest(expectedPath, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromProperties(expectedPath, null);
@@ -155,7 +142,7 @@ public class VersionNamesTest {
         String expectedVersionName = "42L";
         ByteArrayInputStream resourceStream =
             new ByteArrayInputStream((DEFAULT_PROPERTY + "=" + expectedVersionName).getBytes());
-        when(classLoader.getResourceAsStream(DEFAULT_PROPERTIES_FILE_PATH)).thenReturn(resourceStream);
+        mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromProperties();
@@ -170,7 +157,7 @@ public class VersionNamesTest {
      */
     @Test
     public void testGetVersionNameFromPropertiesResourceNull() throws Exception {
-        when(classLoader.getResourceAsStream(DEFAULT_PROPERTIES_FILE_PATH)).thenReturn(null);
+        mockManifest(DEFAULT_PROPERTIES_FILE_PATH, null);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromProperties();
@@ -189,7 +176,7 @@ public class VersionNamesTest {
     @Test
     public void testGetVersionNameFromPropertiesResourceIOExceptionProperties() throws Exception {
         InputStream resourceStream = mock(InputStream.class, new ThrowIOExceptionOnEachMethodCall());
-        when(classLoader.getResourceAsStream(DEFAULT_PROPERTIES_FILE_PATH)).thenReturn(resourceStream);
+        mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromProperties();
@@ -208,7 +195,7 @@ public class VersionNamesTest {
     @Test
     public void testGetVersionNameFromPropertiesResourcePropertyNull() throws Exception {
         ByteArrayInputStream resourceStream = new ByteArrayInputStream("someOtherProperty=42L".getBytes());
-        when(classLoader.getResourceAsStream(DEFAULT_PROPERTIES_FILE_PATH)).thenReturn(resourceStream);
+        mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromProperties();
@@ -229,11 +216,11 @@ public class VersionNamesTest {
         String expectedVersionName = "42L";
         ByteArrayInputStream resourceStream =
             new ByteArrayInputStream((DEFAULT_PROPERTY + "=" + expectedVersionName).getBytes());
-        when(classLoader.getResourceAsStream(DEFAULT_PROPERTIES_FILE_PATH)).thenReturn(resourceStream);
+        mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
         InputStream resourceStreamSpy = spy(resourceStream);
         doThrow(new IOException("Mocked exception")).when(resourceStreamSpy).close();
-        when(classLoader.getResourceAsStream(DEFAULT_PROPERTIES_FILE_PATH)).thenReturn(resourceStreamSpy);
+        mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStreamSpy);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromProperties();
@@ -254,7 +241,8 @@ public class VersionNamesTest {
         String expectedAttribute = "someOtherAttribute";
         String expectedVersionName = "42";
         ByteArrayInputStream resourceStream = createManifest(expectedAttribute, expectedVersionName);
-        when(classLoader.getResourceAsStream(expectedPath)).thenReturn(resourceStream);
+
+        mockManifest(expectedPath, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromManifest(expectedPath, expectedAttribute);
@@ -272,7 +260,7 @@ public class VersionNamesTest {
     public void testGetVersionNameFromManifestParameterAttributeNull() throws Exception {
         String expectedPath = "path";
         ByteArrayInputStream resourceStream = createManifest("someAttribute", "42");
-        when(classLoader.getResourceAsStream(expectedPath)).thenReturn(resourceStream);
+        mockManifest(expectedPath, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromManifest(expectedPath, null);
@@ -310,7 +298,7 @@ public class VersionNamesTest {
     public void testGetVersionNameFromManifest() throws Exception {
         String expectedVersionName = "42";
         ByteArrayInputStream resourceStream = createManifest(DEFAULT_MANIFEST_ATTRIBUTE, expectedVersionName);
-        when(classLoader.getResourceAsStream(DEFAULT_MANIFEST_PATH)).thenReturn(resourceStream);
+        mockManifest(DEFAULT_MANIFEST_PATH, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromManifest();
@@ -325,7 +313,7 @@ public class VersionNamesTest {
      */
     @Test
     public void testGetVersionNameFromManifestResourceNull() throws Exception {
-        when(classLoader.getResourceAsStream(DEFAULT_MANIFEST_PATH)).thenReturn(null);
+        mockManifest(DEFAULT_MANIFEST_PATH, null);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromManifest();
@@ -344,7 +332,7 @@ public class VersionNamesTest {
     @Test
     public void testGetVersionNameFromManifestIOExceptionManifest() throws Exception {
         InputStream resourceStream = mock(InputStream.class, new ThrowIOExceptionOnEachMethodCall());
-        when(classLoader.getResourceAsStream(DEFAULT_MANIFEST_PATH)).thenReturn(resourceStream);
+        mockManifest(DEFAULT_MANIFEST_PATH, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromManifest();
@@ -362,7 +350,7 @@ public class VersionNamesTest {
     @Test
     public void testGetVersionNameFromManifestAttributeNull() throws Exception {
         ByteArrayInputStream resourceStream = createManifest("someOtherAttribute", "42");
-        when(classLoader.getResourceAsStream(DEFAULT_MANIFEST_PATH)).thenReturn(resourceStream);
+        mockManifest(DEFAULT_MANIFEST_PATH, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromManifest();
@@ -382,7 +370,7 @@ public class VersionNamesTest {
     public void testGetVersionNameFromManifestIOExceptionOnClose() throws Exception {
         InputStream resourceStream = mock(InputStream.class);
         doThrow(new IOException("Mocked exception")).when(resourceStream).close();
-        when(classLoader.getResourceAsStream(DEFAULT_MANIFEST_PATH)).thenReturn(resourceStream);
+        mockManifest(DEFAULT_MANIFEST_PATH, resourceStream);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromManifest();
@@ -432,5 +420,9 @@ public class VersionNamesTest {
         public Object answer(InvocationOnMock invocation) throws Throwable {
             throw new IOException("Mocked Exception");
         }
+    }
+
+    private void mockManifest(String manifestPath, InputStream returnedStream) {
+        when(classLoader.getResourceAsStream(manifestPath)).thenReturn(returnedStream);
     }
 }
