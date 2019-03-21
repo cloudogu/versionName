@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -69,7 +71,8 @@ public class VersionNames {
     /**
      * Class that allows access to resources. Can be overwritten in a test.
      */
-    private static ClassLoader classLoader = VersionNames.class.getClassLoader();
+    // TODO this shouldn't be static!
+    private static ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
     /**
      * Utility class. Do not instantiate.
@@ -197,13 +200,20 @@ public class VersionNames {
          * {@link #handleResourceStream(InputStream, String)}.
          */
         private String processResource(String resourcePath, String key) {
-            // Actual reading logic
-            InputStream resourceStream = classLoader.getResourceAsStream(resourcePath);
+            // TODO this code must be cleaned up
+            InputStream resourceStream = null;
             try {
-                if (resourceStream != null) {
-                    return handleResourceStream(resourceStream, key);
-                } else {
-                    LOG.error(LOG_RESOURCE_NOT_FOUND, resourcePath);
+                Enumeration<URL> resources = classLoader.getResources(resourcePath);
+                while (resources.hasMoreElements()) {
+                    resourceStream = resources.nextElement().openStream();
+                    if (resourceStream != null) {
+                        String potentialVersion = handleResourceStream(resourceStream, key);
+                        if (potentialVersion != null && !potentialVersion.isEmpty()) {
+                            return potentialVersion;
+                        }
+                    } else {
+                        LOG.error(LOG_RESOURCE_NOT_FOUND, resourcePath);
+                    }
                 }
             } catch (IOException e) {
                 LOG.error(LOG_EXCEPTION_READING_FROM_RESOURCE, resourcePath, e);

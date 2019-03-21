@@ -39,6 +39,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -92,7 +97,7 @@ public class VersionNamesTest {
 
         // Assertions
         assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
-        verify(classLoader).getResourceAsStream(expectedPath);
+        verify(classLoader).getResources(expectedPath);
     }
 
     /**
@@ -249,7 +254,7 @@ public class VersionNamesTest {
 
         // Assertions
         assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
-        verify(classLoader).getResourceAsStream(expectedPath);
+        verify(classLoader).getResources(expectedPath);
     }
 
     /**
@@ -423,6 +428,22 @@ public class VersionNamesTest {
     }
 
     private void mockManifest(String manifestPath, InputStream returnedStream) {
-        when(classLoader.getResourceAsStream(manifestPath)).thenReturn(returnedStream);
+        final URLConnection mockUrlCon = mock(URLConnection.class);
+
+        try {
+            doReturn(returnedStream).when(mockUrlCon).getInputStream();
+            URLStreamHandler stubUrlHandler = new URLStreamHandler() {
+                @Override
+                protected URLConnection openConnection(URL u) throws IOException {
+                    return mockUrlCon;
+                }
+            };
+            URL url = new URL("dont", "care", 0, "about-this", stubUrlHandler);
+            Enumeration<URL> resources = Collections.enumeration(Collections.singletonList(url));
+            when(classLoader.getResources(manifestPath)).thenReturn(resources);
+        } catch (Exception e) {
+            // We're in a test so save us the trouble of checked exceptions
+            throw new RuntimeException(e);
+        }
     }
 }
