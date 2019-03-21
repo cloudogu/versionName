@@ -1,5 +1,5 @@
 #!groovy
-@Library('github.com/cloudogu/ces-build-lib@8dd2371')
+@Library('github.com/cloudogu/ces-build-lib@a4e02124')
 import com.cloudogu.ces.cesbuildlib.*
 
 node { // No specific label
