@@ -85,7 +85,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
                 <configuration>
                     <arguments>-Prelease</arguments>
                     <!-- Make our tags look like e.g. "v1.0.1" -->
@@ -93,6 +92,20 @@
                 </configuration>
             </plugin>
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.22.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
 
