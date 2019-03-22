@@ -58,6 +58,7 @@ import static org.mockito.Mockito.*;
  */
 public class VersionNamesTest {
 
+    public static final String MANIFEST_WITHOUT_VERSION = "someProperty=42\nOtherProp=23";
     /**
      * Allows for mocking behavior of the static methods of {@link VersionNames}.
      */
@@ -86,8 +87,7 @@ public class VersionNamesTest {
         String expectedPath = "path";
         String expectedProperty = "someOtherProperty";
         String expectedVersionName = "42";
-        ByteArrayInputStream resourceStream =
-            new ByteArrayInputStream((expectedProperty + "=" + expectedVersionName).getBytes());
+        ByteArrayInputStream resourceStream = createManifestStreamWithVersion(expectedVersionName, expectedProperty);
         mockManifest(expectedPath, resourceStream);
 
         // Call method under test
@@ -105,7 +105,7 @@ public class VersionNamesTest {
     @Test
     public void testGetVersionNameFromPropertiesPropertyNull() throws Exception {
         String expectedPath = "path";
-        ByteArrayInputStream resourceStream = new ByteArrayInputStream(("someProperty=42").getBytes());
+        ByteArrayInputStream resourceStream = createManifestStreamWithoutVersionName();
         mockManifest(expectedPath, resourceStream);
 
         // Call method under test
@@ -141,8 +141,7 @@ public class VersionNamesTest {
     @Test
     public void testGetVersionNameFromPropertiesResource() {
         String expectedVersionName = "42L";
-        ByteArrayInputStream resourceStream =
-            new ByteArrayInputStream((DEFAULT_PROPERTY + "=" + expectedVersionName).getBytes());
+        ByteArrayInputStream resourceStream = createManifestStreamWithVersion(expectedVersionName);
         mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
         // Call method under test
@@ -215,7 +214,7 @@ public class VersionNamesTest {
      */
     @Test
     public void testGetVersionNameFromPropertiesResourcePropertyNull() throws Exception {
-        ByteArrayInputStream resourceStream = new ByteArrayInputStream("someOtherProperty=42L".getBytes());
+        ByteArrayInputStream resourceStream = createManifestStreamWithoutVersionName();
         mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
         // Call method under test
@@ -228,6 +227,7 @@ public class VersionNamesTest {
         assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
 
+
     /**
      * Test for {@link VersionNames#getVersionNameFromProperties(String, String)}, when an IOException occurs when
      * closing the resource stream.
@@ -235,8 +235,7 @@ public class VersionNamesTest {
     @Test
     public void testGetVersionNameFromPropertiesResourceIOExceptionOnClose() throws Exception {
         String expectedVersionName = "42L";
-        ByteArrayInputStream resourceStream =
-            new ByteArrayInputStream((DEFAULT_PROPERTY + "=" + expectedVersionName).getBytes());
+        ByteArrayInputStream resourceStream = createManifestStreamWithVersion(expectedVersionName);
         mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
         InputStream resourceStreamSpy = spy(resourceStream);
@@ -429,6 +428,19 @@ public class VersionNamesTest {
         public Object answer(InvocationOnMock invocation) throws Throwable {
             throw new IOException("Mocked Exception");
         }
+    }
+
+    private ByteArrayInputStream createManifestStreamWithVersion(String expectedVersionName) {
+        return new ByteArrayInputStream((DEFAULT_PROPERTY + "=" + expectedVersionName).getBytes());
+    }
+
+    private ByteArrayInputStream createManifestStreamWithVersion(String expectedVersionName, String defaultProperty) {
+        return new ByteArrayInputStream((MANIFEST_WITHOUT_VERSION + '\n' + defaultProperty + "=" + expectedVersionName)
+            .getBytes());
+    }
+
+    private ByteArrayInputStream createManifestStreamWithoutVersionName() {
+        return new ByteArrayInputStream(MANIFEST_WITHOUT_VERSION.getBytes());
     }
 
     private void mockManifest(String manifestPath, InputStream returnedStream) {
