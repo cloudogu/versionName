@@ -207,6 +207,7 @@ public class VersionNames {
             return null;
         }
 
+        @SuppressWarnings("squid:S2583") // How can sonar be sure that openStream() always returns non-null?
         private String processUrl(String resourcePath, String key, URL url) {
             InputStream resourceStream = null;
             try {
