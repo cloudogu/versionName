@@ -175,7 +175,7 @@ public class VersionNamesTest {
      * loading the properties.
      */
     @Test
-    public void testGetVersionNameFromPropertiesResourceIOExceptionProperties() throws Exception {
+    public void testGetVersionNameFromPropertiesResourceIOExceptionOpenStream() throws Exception {
         InputStream resourceStream = mock(InputStream.class, new ThrowIOExceptionOnEachMethodCall());
         mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
@@ -188,6 +188,26 @@ public class VersionNamesTest {
         assertEquals("Unexpected log message", LOG_EXCEPTION_READING_FROM_RESOURCE, logEvent.getMessage());
         assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
+
+    /**
+     * Test for {@link VersionNames#getVersionNameFromProperties(String, String)}, when an IOException occurs when
+     * reading the manifests from classpath
+     */
+    @Test
+    public void testGetVersionNameFromPropertiesResourceIOExceptionGetResources() throws Exception {
+        when(classLoader.getResources(anyString())).thenThrow(new IOException("Mocked Exception"));
+
+        // Call method under test
+        String actualVersionName = VersionNames.getVersionNameFromProperties();
+
+        // Assertions
+        assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_EXCEPTION_GETTING_MANIFESTS_FROM_CLASSPATH, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
+    }
+
+    // TODO return multiple manifests where only one has the versionName
 
     /**
      * Test for {@link VersionNames#getVersionNameFromProperties(String, String)}, where the property is

@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.jar.Attributes;
@@ -151,6 +152,7 @@ public class VersionNames {
         static final String LOG_RESOURCE_PATH_NULL = "Cannot read version name. Resource path is null";
         static final String LOG_NOT_FOUND_IN_RESOURCE = "Version name not found in {}";
         static final String LOG_EXCEPTION_READING_FROM_RESOURCE = "Exception while reading version name from {}";
+        static final String LOG_EXCEPTION_GETTING_MANIFESTS_FROM_CLASSPATH = "Exception while reading manifests from classpath: {}";
         static final String LOG_EXCEPTION_ON_CLOSE = "Unable to close resource stream after reading version number";
 
         /**
@@ -196,9 +198,10 @@ public class VersionNames {
         private String processResource(String resourcePath, String key) {
             // TODO this code must be cleaned up
             InputStream resourceStream = null;
-            try {
-                Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(resourcePath);
-                while (resources.hasMoreElements()) {
+
+            Enumeration<URL> resources = getResources(resourcePath);
+            while (resources.hasMoreElements()) {
+                try {
                     resourceStream = resources.nextElement().openStream();
                     if (resourceStream != null) {
                         String potentialVersion = handleResourceStream(resourceStream, key);
@@ -208,19 +211,32 @@ public class VersionNames {
                     } else {
                         LOG.error(LOG_RESOURCE_NOT_FOUND, resourcePath);
                     }
-                }
-            } catch (IOException e) {
-                LOG.error(LOG_EXCEPTION_READING_FROM_RESOURCE, resourcePath, e);
-            } finally {
-                if (resourceStream != null) {
-                    try {
-                        resourceStream.close();
-                    } catch (IOException e) {
-                        LOG.warn(LOG_EXCEPTION_ON_CLOSE, e);
-                    }
+                } catch (IOException e) {
+                    LOG.error(LOG_EXCEPTION_READING_FROM_RESOURCE, resourcePath, e);
+                } finally {
+                    closeStreamIfNotNull(resourceStream);
                 }
             }
             return null;
+        }
+
+        private Enumeration<URL> getResources(String resourcePath) {
+            try {
+                return Thread.currentThread().getContextClassLoader().getResources(resourcePath);
+            } catch (IOException e) {
+                LOG.error(LOG_EXCEPTION_GETTING_MANIFESTS_FROM_CLASSPATH, resourcePath, e);
+                return Collections.enumeration(Collections.emptyList());
+            }
+        }
+
+        private void closeStreamIfNotNull(InputStream resourceStream) {
+            if (resourceStream != null) {
+                try {
+                    resourceStream.close();
+                } catch (IOException e) {
+                    LOG.warn(LOG_EXCEPTION_ON_CLOSE, e);
+                }
+            }
         }
     }
 }
