@@ -28,6 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.OngoingStubbing;
 import uk.org.lidalia.slf4jext.Level;
 import uk.org.lidalia.slf4jtest.LoggingEvent;
 import uk.org.lidalia.slf4jtest.TestLogger;
@@ -41,8 +42,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
-import java.util.Collections;
-import java.util.Enumeration;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -157,7 +157,7 @@ public class VersionNamesTest {
      */
     @Test
     public void testGetVersionNameFromPropertiesResourceNull() throws Exception {
-        mockManifest(DEFAULT_PROPERTIES_FILE_PATH, null);
+        mockManifest(DEFAULT_PROPERTIES_FILE_PATH, (InputStream) null);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromProperties();
@@ -206,7 +206,44 @@ public class VersionNamesTest {
         assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
     }
 
-    // TODO return multiple manifests where only one has the versionName
+    /**
+     * Positive test for {@link VersionNames#getVersionNameFromProperties(String, String)} where multiple Manifests
+     * are found on the classpath where only one contains the version.
+     */
+    @Test
+    public void testGetVersionNameFromPropertiesResourceMultipleManifests() {
+        String expectedVersionName = "42L";
+        mockManifest(DEFAULT_PROPERTIES_FILE_PATH,
+            Arrays.asList(createManifestStreamWithoutVersionName(), createManifestStreamWithVersion(expectedVersionName)
+            ));
+
+        // Call method under test
+        String actualVersionName = VersionNames.getVersionNameFromProperties();
+
+        // Assertions
+        assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
+    }
+
+    /**
+     * Negative test for {@link VersionNames#getVersionNameFromProperties(String, String)} where multiple Manifests
+     * are found on the classpath where none contains the version.
+     */
+    @Test
+    public void testGetVersionNameFromPropertiesResourceMultipleManifestsNoVersion() {
+        mockManifest(DEFAULT_PROPERTIES_FILE_PATH,
+            Arrays.asList(createManifestStreamWithoutVersionName(), createManifestStreamWithoutVersionName()
+            ));
+
+        // Call method under test
+        String actualVersionName = VersionNames.getVersionNameFromProperties();
+
+        // Assertions
+        assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
+
+        LoggingEvent logEvent = getLogEvent(0);
+        assertEquals("Unexpected log message", LOG_NOT_FOUND_IN_RESOURCE, logEvent.getMessage());
+        assertEquals("Unexpected log level", Level.ERROR, logEvent.getLevel());
+    }
 
     /**
      * Test for {@link VersionNames#getVersionNameFromProperties(String, String)}, where the property is
@@ -331,7 +368,7 @@ public class VersionNamesTest {
      */
     @Test
     public void testGetVersionNameFromManifestResourceNull() throws Exception {
-        mockManifest(DEFAULT_MANIFEST_PATH, null);
+        mockManifest(DEFAULT_MANIFEST_PATH, (InputStream) null);
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromManifest();
@@ -444,10 +481,13 @@ public class VersionNamesTest {
     }
 
     private void mockManifest(String manifestPath, InputStream returnedStream) {
+        mockManifest(manifestPath, Collections.singletonList(returnedStream));
+    }
+
+    private void mockManifest(String manifestPath, List<InputStream> returnedStreams) {
         final URLConnection mockUrlCon = mock(URLConnection.class);
 
         try {
-            doReturn(returnedStream).when(mockUrlCon).getInputStream();
             URLStreamHandler stubUrlHandler = new URLStreamHandler() {
                 @Override
                 protected URLConnection openConnection(URL u) throws IOException {
@@ -455,7 +495,15 @@ public class VersionNamesTest {
                 }
             };
             URL url = new URL("dont", "care", 0, "about-this", stubUrlHandler);
-            Enumeration<URL> resources = Collections.enumeration(Collections.singletonList(url));
+            List<URL> urls = new LinkedList<>();
+
+            OngoingStubbing<InputStream> when = when(mockUrlCon.getInputStream());
+            for (InputStream returnedStream : returnedStreams) {
+                when = when.thenReturn(returnedStream);
+                // Number of returned urls must have same size as "returnedStream"
+                urls.add(url);
+            }
+            Enumeration<URL> resources = Collections.enumeration(urls);
             when(classLoader.getResources(manifestPath)).thenReturn(resources);
         } catch (Exception e) {
             // We're in a test so save us the trouble of checked exceptions
