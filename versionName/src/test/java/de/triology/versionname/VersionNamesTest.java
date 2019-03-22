@@ -38,7 +38,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -76,8 +75,7 @@ public class VersionNamesTest {
 
     @Before
     public void setUp() throws Exception {
-        // Inject mocked class into static field
-        setVersionNamesClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(classLoader);
     }
 
     /**
@@ -126,8 +124,6 @@ public class VersionNamesTest {
      */
     @Test
     public void testGetVersionNameFromPropertiesPathNull() throws Exception {
-        // Use real class loader
-        setVersionNamesClassLoader(VersionNames.class.getClassLoader());
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromProperties(null, "someProperty");
@@ -283,8 +279,6 @@ public class VersionNamesTest {
      */
     @Test
     public void testGetVersionNameFromManifestParameterPathNull() throws Exception {
-        // Use real class loader
-        setVersionNamesClassLoader(VersionNames.class.getClassLoader());
 
         // Call method under test
         String actualVersionName = VersionNames.getVersionNameFromManifest(null, "someProperty");
@@ -398,16 +392,6 @@ public class VersionNamesTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         manifest.write(out);
         return new ByteArrayInputStream(out.toByteArray());
-    }
-
-    /**
-     * Allows for replacing {@link VersionNames}' clazz field by a mock.
-     */
-    private void setVersionNamesClassLoader(ClassLoader classLoader) throws Exception {
-        Field field = VersionNames.class.getDeclaredField("classLoader");
-        field.setAccessible(true);
-
-        field.set(null, classLoader);
     }
 
     /**

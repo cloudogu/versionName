@@ -69,12 +69,6 @@ public class VersionNames {
     static final String VERSION_STRING_ON_ERROR = "";
 
     /**
-     * Class that allows access to resources. Can be overwritten in a test.
-     */
-    // TODO this shouldn't be static!
-    private static ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-    /**
      * Utility class. Do not instantiate.
      */
     private VersionNames() {
@@ -203,7 +197,7 @@ public class VersionNames {
             // TODO this code must be cleaned up
             InputStream resourceStream = null;
             try {
-                Enumeration<URL> resources = classLoader.getResources(resourcePath);
+                Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(resourcePath);
                 while (resources.hasMoreElements()) {
                     resourceStream = resources.nextElement().openStream();
                     if (resourceStream != null) {
