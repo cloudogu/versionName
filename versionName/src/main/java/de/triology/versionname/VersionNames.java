@@ -196,26 +196,34 @@ public class VersionNames {
          * {@link #handleResourceStream(InputStream, String)}.
          */
         private String processResource(String resourcePath, String key) {
-            // TODO this code must be cleaned up
-            InputStream resourceStream = null;
-
             Enumeration<URL> resources = getResources(resourcePath);
+
             while (resources.hasMoreElements()) {
-                try {
-                    resourceStream = resources.nextElement().openStream();
-                    if (resourceStream != null) {
-                        String potentialVersion = handleResourceStream(resourceStream, key);
-                        if (potentialVersion != null && !potentialVersion.isEmpty()) {
-                            return potentialVersion;
-                        }
-                    } else {
-                        LOG.error(LOG_RESOURCE_NOT_FOUND, resourcePath);
-                    }
-                } catch (IOException e) {
-                    LOG.error(LOG_EXCEPTION_READING_FROM_RESOURCE, resourcePath, e);
-                } finally {
-                    closeStreamIfNotNull(resourceStream);
+                String potentialVersion = processUrl(resourcePath, key, resources.nextElement());
+                if (potentialVersion != null) {
+                    return potentialVersion;
                 }
+            }
+            return null;
+        }
+
+        private String processUrl(String resourcePath, String key, URL url) {
+            InputStream resourceStream = null;
+            try {
+                resourceStream = url.openStream();
+
+                if (resourceStream != null) {
+                    String potentialVersion = handleResourceStream(resourceStream, key);
+                    if (potentialVersion != null && !potentialVersion.isEmpty()) {
+                        return potentialVersion;
+                    }
+                } else {
+                    LOG.error(LOG_RESOURCE_NOT_FOUND, resourcePath);
+                }
+            } catch (IOException e) {
+                LOG.error(LOG_EXCEPTION_READING_FROM_RESOURCE, resourcePath, e);
+            } finally {
+                closeStreamIfNotNull(resourceStream);
             }
             return null;
         }
