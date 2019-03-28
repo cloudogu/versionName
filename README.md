@@ -27,7 +27,7 @@ With maven for example
 <dependency>
     <groupId>com.cloudogu.versionName</groupId>
     <artifactId>versionName</artifactId>
-    <version>1.0.2</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
