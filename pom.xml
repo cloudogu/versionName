@@ -3,7 +3,7 @@
 
     The MIT License (MIT)
 
-    Copyright (c) 2016 TRIOLOGY GmbH
+    Copyright (c) 2016 Cloudogu GmbH
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -27,45 +27,45 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.triology.versionName</groupId>
+    <groupId>com.cloudogu.versionName</groupId>
     <artifactId>versionName-parent</artifactId>
     <version>1.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>versionName-parent</name>
-    <url>https://github.com/triologygmbh/versionName</url>
+    <url>https://github.com/cloudogu/versionName</url>
     <description>A tiny Java library that allows for conveniently reading the version name of an application </description>
 
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>https://github.com/triologygmbh/command-bus/blob/master/LICENSE</url>
+            <url>https://github.com/cloudogu/versionName/blob/master/LICENSE</url>
         </license>
     </licenses>
 
     <inceptionYear>2017</inceptionYear>
 
     <organization>
-        <name>TRIOLOGY GmbH</name>
-        <url>https://www.triology.de/</url>
+        <name>Cloudogu GmbH</name>
+        <url>https://www.cloudogu.com/</url>
     </organization>
 
     <developers>
 
         <developer>
             <name>Johannes Schnatterer</name>
-            <email>johannes.schnatterer@triology.de</email>
-            <organization>TRIOLOGY GmbH</organization>
-            <organizationUrl>https://www.triology.de/</organizationUrl>
+            <email>johannes.schnatterer@cloudogu.com</email>
+            <organization>Cloudogu GmbH</organization>
+            <organizationUrl>https://www.cloudogu.com/</organizationUrl>
             <timezone>Europe/Berlin</timezone>
         </developer>
 
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/triologygmbh/versionName</connection>
-        <developerConnection>scm:git:https://github.com/triologygmbh/versionName</developerConnection>
-        <url>https://github.com/triologygmbh/versionName.git</url>
+        <connection>scm:git:https://github.com/cloudogu/versionName</connection>
+        <developerConnection>scm:git:https://github.com/cloudogu/versionName</developerConnection>
+        <url>https://github.com/cloudogu/versionName.git</url>
         <tag>HEAD</tag>
     </scm>
 

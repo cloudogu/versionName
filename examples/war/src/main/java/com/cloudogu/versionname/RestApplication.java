@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 TRIOLOGY GmbH
+ * Copyright (c) 2016 Cloudogu GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.triology.versionname;
+package com.cloudogu.versionname;
 
-import java.io.IOException;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
 
-/**
- * Hello world!
- */
-public class App {
-    public static void main(String[] args) throws IOException {
-        System.out.println(VersionNames.getVersionNameFromManifest());
-    }
+@ApplicationPath("/api")
+public class RestApplication extends Application {
 }

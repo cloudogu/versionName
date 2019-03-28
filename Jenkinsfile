@@ -1,5 +1,5 @@
 #!groovy
-@Library('github.com/cloudogu/ces-build-lib@a4e02124')
+@Library('github.com/cloudogu/ces-build-lib@a4e0212')
 import com.cloudogu.ces.cesbuildlib.*
 
 node { // No specific label
@@ -35,9 +35,7 @@ node { // No specific label
 
         stage('Statical Code Analysis') {
             dir('versionName') { // Scan only the library module
-                def sonarQube = new SonarQube(this, 'sonarcloud.io')
-                sonarQube.updateAnalysisResultOfPullRequestsToGitHub('sonarqube-gh')
-                sonarQube.isUsingBranchPlugin = true
+                def sonarQube = new SonarCloud(this, [sonarQubeEnv: 'sonarcloud.io-cloudogu'])
 
                 sonarQube.analyzeWith(mvn)
 
@@ -50,10 +48,10 @@ node { // No specific label
         stage('Deploy') {
             if (preconditionsForDeploymentFulfilled()) {
 
-                mvn.setDeploymentRepository('ossrh', 'https://oss.sonatype.org/', 'de.triology-mavenCentral-acccessToken')
+                mvn.setDeploymentRepository('ossrh', 'https://oss.sonatype.org/', 'mavenCentral-acccessToken')
 
-                mvn.setSignatureCredentials('de.triology-mavenCentral-secretKey-asc-file',
-                    'de.triology-mavenCentral-secretKey-Passphrase')
+                mvn.setSignatureCredentials('mavenCentral-secretKey-asc-file',
+                    'mavenCentral-secretKey-Passphrase')
 
                 mvn.deployToNexusRepositoryWithStaging()
             }

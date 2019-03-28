@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 TRIOLOGY GmbH
+ * Copyright (c) 2016 Cloudogu GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.triology.versionname;
+package com.cloudogu.versionname;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -46,8 +46,8 @@ import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import static de.triology.versionname.VersionNames.*;
-import static de.triology.versionname.VersionNames.VersionName.*;
+import static com.cloudogu.versionname.VersionNames.*;
+import static com.cloudogu.versionname.VersionNames.VersionName.*;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -67,7 +67,7 @@ public class VersionNamesTest {
     /**
      * Logger of class under test.
      */
-    private static final TestLogger LOG = TestLoggerFactory.getTestLogger(VersionNames.class);
+    private static final TestLogger LOG = TestLoggerFactory.getTestLogger(com.cloudogu.versionname.VersionNames.class);
 
     /**
      * Rest logger before each test.
@@ -91,7 +91,7 @@ public class VersionNamesTest {
         mockManifest(expectedPath, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties(expectedPath, expectedProperty);
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties(expectedPath, expectedProperty);
 
         // Assertions
         assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
@@ -109,7 +109,7 @@ public class VersionNamesTest {
         mockManifest(expectedPath, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties(expectedPath, null);
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties(expectedPath, null);
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -126,7 +126,7 @@ public class VersionNamesTest {
     public void testGetVersionNameFromPropertiesPathNull() throws Exception {
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties(null, "someProperty");
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties(null, "someProperty");
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -145,7 +145,7 @@ public class VersionNamesTest {
         mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties();
 
         // Assertions
         assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
@@ -160,7 +160,7 @@ public class VersionNamesTest {
         mockManifest(DEFAULT_PROPERTIES_FILE_PATH, (InputStream) null);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties();
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -179,7 +179,7 @@ public class VersionNamesTest {
         mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties();
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -197,7 +197,7 @@ public class VersionNamesTest {
         when(classLoader.getResources(anyString())).thenThrow(new IOException("Mocked Exception"));
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties();
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -218,7 +218,7 @@ public class VersionNamesTest {
             ));
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties();
 
         // Assertions
         assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
@@ -235,7 +235,7 @@ public class VersionNamesTest {
             ));
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties();
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -255,7 +255,7 @@ public class VersionNamesTest {
         mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties();
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -280,7 +280,7 @@ public class VersionNamesTest {
         mockManifest(DEFAULT_PROPERTIES_FILE_PATH, resourceStreamSpy);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromProperties();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromProperties();
 
         // Assertions
         assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
@@ -302,7 +302,7 @@ public class VersionNamesTest {
         mockManifest(expectedPath, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromManifest(expectedPath, expectedAttribute);
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromManifest(expectedPath, expectedAttribute);
 
         // Assertions
         assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
@@ -320,7 +320,7 @@ public class VersionNamesTest {
         mockManifest(expectedPath, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromManifest(expectedPath, null);
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromManifest(expectedPath, null);
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -337,7 +337,7 @@ public class VersionNamesTest {
     public void testGetVersionNameFromManifestParameterPathNull() throws Exception {
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromManifest(null, "someProperty");
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromManifest(null, "someProperty");
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -356,7 +356,7 @@ public class VersionNamesTest {
         mockManifest(DEFAULT_MANIFEST_PATH, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromManifest();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromManifest();
 
         // Assertions
         assertEquals("Unexpected version name", expectedVersionName, actualVersionName);
@@ -371,7 +371,7 @@ public class VersionNamesTest {
         mockManifest(DEFAULT_MANIFEST_PATH, (InputStream) null);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromManifest();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromManifest();
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -390,7 +390,7 @@ public class VersionNamesTest {
         mockManifest(DEFAULT_MANIFEST_PATH, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromManifest();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromManifest();
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -408,7 +408,7 @@ public class VersionNamesTest {
         mockManifest(DEFAULT_MANIFEST_PATH, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromManifest();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromManifest();
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);
@@ -428,7 +428,7 @@ public class VersionNamesTest {
         mockManifest(DEFAULT_MANIFEST_PATH, resourceStream);
 
         // Call method under test
-        String actualVersionName = VersionNames.getVersionNameFromManifest();
+        String actualVersionName = com.cloudogu.versionname.VersionNames.getVersionNameFromManifest();
 
         // Assertions
         assertEquals("Unexpected version name", VERSION_STRING_ON_ERROR, actualVersionName);

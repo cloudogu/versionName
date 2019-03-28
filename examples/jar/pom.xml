@@ -3,7 +3,7 @@
 
     The MIT License (MIT)
 
-    Copyright (c) 2016 TRIOLOGY GmbH
+    Copyright (c) 2016 Cloudogu GmbH
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>de.triology.versionName</groupId>
+        <groupId>com.cloudogu.versionName</groupId>
         <artifactId>versionName-examples</artifactId>
         <version>1.0.4-SNAPSHOT</version>
     </parent>
@@ -38,7 +38,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <mainClass>de.triology.versionname.App</mainClass>
+        <mainClass>com.cloudogu.versionname.App</mainClass>
     </properties>
 
     <build>

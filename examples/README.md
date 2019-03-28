@@ -1,7 +1,7 @@
 versionName-examples
 ====================
 
-Examples on how to generate an extended version name with maven and read it from within the application using the [version name library](https://github.com/triologygmbh/versionName).
+Examples on how to generate an extended version name with maven and read it from within the application using the [version name library](https://github.com/cloudogu/versionName).
 The examples show how to extended the version names with the following attributes
 - the version,
 - the build date,
@@ -34,12 +34,12 @@ The example have been testes with Maven 3.3.9 and should work with Java 1.6+.
 
 ## Version name in manifest
 - Write to manifest using maven, see [jar/pom.xml](jar/pom.xml)
-- Read from manifest. For logic, see [VersionNames.getVersionNameFromManifest()](../versionName/src/main/java/de/triology/versionname/VersionNames.java), example: [JAR](jar/src/main/java/de/triology/versionname/App.java)
+- Read from manifest. For logic, see [VersionNames.getVersionNameFromManifest()](../versionName/src/main/java/com/cloudogu/versionname/VersionNames.java), example: [JAR](jar/src/main/java/com/cloudogu/versionname/App.java)
 - Run it: ``java -jar jar/target/jar-1.0.1-SNAPSHOT-jar-with-dependencies.jar ``
 
 ## Version name in properties file
 - Write to properties using maven, see [war/pom.xml](war/pom.xml)
-- Read from properties. For logic, see [VersionNames.getVersionNameFromProperties()](../versionName/src/main/java/de/triology/versionname/VersionNames.java), example: [REST resource](war/src/main/java/de/triology/versionname/VersionResource.java)
+- Read from properties. For logic, see [VersionNames.getVersionNameFromProperties()](../versionName/src/main/java/com/cloudogu/versionname/VersionNames.java), example: [REST resource](war/src/main/java/com/cloudogu/versionname/VersionResource.java)
 - Run it: ``java -jar server/target/server-1.0.1-SNAPSHOT-jar-with-dependencies.jar``  
   [http://localhost:8080/api/version](http://localhost:8080/api/version)
 
