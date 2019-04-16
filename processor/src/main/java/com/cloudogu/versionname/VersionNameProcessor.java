@@ -3,9 +3,11 @@ package com.cloudogu.versionname;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
+import org.kohsuke.MetaInfServices;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
@@ -23,6 +25,7 @@ import java.util.Set;
 @SupportedAnnotationTypes("com.cloudogu.versionname.VersionName")
 // compilerArgs: "-AversionName=${versionName}"
 @SupportedOptions({"versionName"})
+@MetaInfServices(Processor.class)
 public class VersionNameProcessor extends AbstractProcessor {
 
     @Override
