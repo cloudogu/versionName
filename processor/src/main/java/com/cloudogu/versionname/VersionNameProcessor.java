@@ -21,12 +21,8 @@ import java.util.Set;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes("com.cloudogu.versionname.VersionName")
-// <artifactId>maven-compiler-plugin</artifactId>
-//<compilerArgs>
-//<arg>-AversionName=${versionName}</arg>
-//</compilerArgs>
+// compilerArgs: "-AversionName=${versionName}"
 @SupportedOptions({"versionName"})
-
 public class VersionNameProcessor extends AbstractProcessor {
 
     @Override
@@ -38,7 +34,9 @@ public class VersionNameProcessor extends AbstractProcessor {
                 for (VersionName annotationInstance : annotationInstances) {
 
                     try {
-                        writeVersionClass(processingEnv.getOptions().get("versionName"),
+                        // TODO error when empty or null
+                        String versionName = processingEnv.getOptions().get("versionName");
+                        writeVersionClass(versionName,
                             annotationInstance,
                             element
                         );

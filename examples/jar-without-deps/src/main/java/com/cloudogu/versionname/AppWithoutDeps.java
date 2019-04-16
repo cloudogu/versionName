@@ -23,10 +23,9 @@
  */
 package com.cloudogu.versionname;
 
-import java.io.IOException;
-
-public class App {
-    public static void main(String[] args) throws IOException {
-        System.out.println(VersionNames.getVersionNameFromManifest());
+@VersionName
+public class AppWithoutDeps {
+    public static void main(String[] args) {
+        System.out.println(Version.NAME);
     }
 }

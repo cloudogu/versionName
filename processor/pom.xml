@@ -13,6 +13,16 @@
     <artifactId>processor</artifactId>
     <version>2.0.1-SNAPSHOT</version>
 
+    <build><plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <encoding>UTF-8</encoding>
+                <compilerArgs>-proc:none</compilerArgs>
+            </configuration>
+        </plugin>
+    </plugins></build>
     <dependencies>
         <dependency>
             <groupId>com.google.testing.compile</groupId>
@@ -33,7 +43,6 @@
             <artifactId>javapoet</artifactId>
             <version>1.11.1</version>
         </dependency>
-
     </dependencies>
     
 </project>
