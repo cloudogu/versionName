@@ -2,13 +2,16 @@ package com.cloudogu.versionname;
 
 import com.google.common.base.Joiner;
 import com.google.common.truth.Truth;
+import com.google.testing.compile.CompileTester;
 import com.google.testing.compile.JavaFileObjects;
+import com.google.testing.compile.JavaSourcesSubject;
 import com.google.testing.compile.JavaSourcesSubjectFactory;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import javax.tools.JavaFileObject;
+
 import java.util.Collections;
 
 public class VersionNameNameProcessorTest {
@@ -16,7 +19,10 @@ public class VersionNameNameProcessorTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    final JavaFileObject clazzInput = JavaFileObjects.forSourceString(
+    private String expectedErrorMissingCompilerArg = "Compile Arg \"versionName\" not set.";
+    private String expectedVersion = "1.2.3";
+
+    private final JavaFileObject clazzInput = JavaFileObjects.forSourceString(
         "com.example.A",
         Joiner.on(System.lineSeparator()).join(
             "package com.example;",
@@ -36,7 +42,6 @@ public class VersionNameNameProcessorTest {
         )
     );
 
-    private String expectedVersion = "1.2.3";
 
     final JavaFileObject expectedOutput = JavaFileObjects.forSourceString(
         //"com.example.VersionName",
@@ -55,19 +60,38 @@ public class VersionNameNameProcessorTest {
     );
 
     @Test
-    public void processClass() {
-        processAndAssert(clazzInput, expectedOutput);
-    }
-
-    private void processAndAssert(JavaFileObject input, JavaFileObject output) {
-
-        Truth.assert_()
-            .about(JavaSourcesSubjectFactory.javaSources())
-            .that(Collections.singletonList(input))
-            .withCompilerOptions("-AversionName=" + expectedVersion)
-            .processedWith(new VersionNameProcessor())
+    public void happyDays() {
+        process(clazzInput, "-AversionName=" + expectedVersion)
             .compilesWithoutError()
             .and()
-            .generatesSources(output);
+            .generatesSources(expectedOutput);
+    }
+
+    @Test
+    public void compilerArgNotSet() {
+
+        process(clazzInput, null)
+            .failsToCompile()
+            .withErrorContaining(expectedErrorMissingCompilerArg);
+    }
+
+    @Test
+    public void compilerArgEmtpy() {
+        process(clazzInput, "-AversionName=")
+            .failsToCompile()
+            .withErrorContaining(expectedErrorMissingCompilerArg);
+    }
+
+    private CompileTester process(JavaFileObject sources, String compilerArgString) {
+
+        JavaSourcesSubject src = Truth.assert_()
+            .about(JavaSourcesSubjectFactory.javaSources())
+            .that(Collections.singletonList(sources));
+
+        if (compilerArgString != null && !compilerArgString.isEmpty()) {
+            src = src.withCompilerOptions(compilerArgString);
+        }
+
+        return src.processedWith(new VersionNameProcessor());
     }
 }

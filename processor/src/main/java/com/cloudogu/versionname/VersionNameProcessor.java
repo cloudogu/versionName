@@ -37,8 +37,8 @@ public class VersionNameProcessor extends AbstractProcessor {
                 for (VersionName annotationInstance : annotationInstances) {
 
                     try {
-                        // TODO error when empty or null
-                        String versionName = processingEnv.getOptions().get("versionName");
+                        String versionName = readAndValidateVersionNameFromCompilerArg();
+
                         writeVersionClass(versionName,
                             annotationInstance,
                             element
@@ -50,6 +50,14 @@ public class VersionNameProcessor extends AbstractProcessor {
             }
         }
         return true;
+    }
+
+    private String readAndValidateVersionNameFromCompilerArg() throws IOException {
+        String versionName = processingEnv.getOptions().get("versionName");
+        if (versionName == null || versionName.isEmpty()) {
+            throw new IOException("Compile Arg \"versionName\" not set.");
+        }
+        return versionName;
     }
 
     private void writeVersionClass(String versionName, VersionName versionNameAnnotation, Element element) throws IOException {
