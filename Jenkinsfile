@@ -31,6 +31,10 @@ node { // No specific label
                 echo "Returned version number: ${actualVersionNumber}"
                 assert actualVersionNumber.contains(mvn.version)
             }
+
+            actualVersionNumber = java "-jar examples/jar-without-deps/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
+            echo "Returned version number: ${actualVersionNumber}"
+            assert actualVersionNumber.contains(mvn.version)
         }
 
         stage('Statical Code Analysis') {
