@@ -23,7 +23,6 @@
  */
 package com.cloudogu.versionname;
 
-@VersionName
 public class AppWithoutDeps {
     public static void main(String[] args) {
         System.out.println(Version.NAME);

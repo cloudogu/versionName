@@ -42,6 +42,14 @@ public class VersionNameNameProcessorTest {
         )
     );
 
+    private final JavaFileObject packageInput = JavaFileObjects.forSourceString(
+        "com.example.package-info",
+        Joiner.on(System.lineSeparator()).join(
+            "@VersionName",
+            "package com.example;",
+            "import com.cloudogu.versionname.VersionName;"
+        )
+    );
 
     final JavaFileObject expectedOutput = JavaFileObjects.forSourceString(
         //"com.example.VersionName",
@@ -60,8 +68,16 @@ public class VersionNameNameProcessorTest {
     );
 
     @Test
-    public void happyDays() {
+    public void generateFromClass() {
         process(clazzInput, "-AversionName=" + expectedVersion)
+            .compilesWithoutError()
+            .and()
+            .generatesSources(expectedOutput);
+    }
+
+    @Test
+    public void generateFromPackage() {
+        process(packageInput, "-AversionName=" + expectedVersion)
             .compilesWithoutError()
             .and()
             .generatesSources(expectedOutput);

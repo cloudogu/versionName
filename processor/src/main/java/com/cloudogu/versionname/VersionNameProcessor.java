@@ -39,10 +39,8 @@ public class VersionNameProcessor extends AbstractProcessor {
                     try {
                         String versionName = readAndValidateVersionNameFromCompilerArg();
 
-                        writeVersionClass(versionName,
-                            annotationInstance,
-                            element
-                        );
+                        writeVersionClass(versionName, annotationInstance, element);
+
                     } catch (IOException e) {
                         error(e);
                     }
@@ -63,7 +61,7 @@ public class VersionNameProcessor extends AbstractProcessor {
     private void writeVersionClass(String versionName, VersionName versionNameAnnotation, Element element) throws IOException {
         Filer filer = processingEnv.getFiler();
         // TODO what about root package?
-        String packageName = element.getEnclosingElement().toString();
+        String packageName = findPackageName(element);
 
         TypeSpec VersionClass = TypeSpec.classBuilder(versionNameAnnotation.className())
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -74,6 +72,15 @@ public class VersionNameProcessor extends AbstractProcessor {
             .build();
 
         JavaFile.builder(packageName, VersionClass).build().writeTo(filer);
+    }
+
+    private String findPackageName(Element element) {
+        if (element.getEnclosingElement() != null) {
+            // Class
+            return element.getEnclosingElement().toString();
+        }
+        // Package
+        return element.toString();
     }
 
     private void error(IOException e) {
