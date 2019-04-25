@@ -41,6 +41,25 @@ public class VersionNameNameProcessorTest {
         )
     );
 
+    private final JavaFileObject clazzDefaultPackageInput = JavaFileObjects.forSourceString(
+        "A",
+        Joiner.on(System.lineSeparator()).join(
+            "",
+            "import com.cloudogu.versionname.VersionName;",
+            "",
+            // Declare generation of Version class
+            "@VersionName",
+            "public class A {",
+            "",
+            "  public String hello() {",
+            // Use generated class
+            "    return Version.NAME;",
+            "  }",
+            "",
+            "}"
+        )
+    );
+
     private final JavaFileObject packageInput = JavaFileObjects.forSourceString(
         "com.example.package-info",
         Joiner.on(System.lineSeparator()).join(
@@ -101,6 +120,20 @@ public class VersionNameNameProcessorTest {
     }
 
     @Test
+    public void generateFromClassInRootPackage() {
+        process("-AversionName=" + expectedVersion, clazzDefaultPackageInput)
+            .compilesWithoutError()
+            .and()
+            .generatesSources(expectedOutput(DEFAULT_CLASS_NAME, DEFAULT_FIELD_NAME, ""));
+    }
+
+    @Test
+    public void generateFromPackageInRootPackage() {
+        // It is syntactically impossible to use an annotation on the default package, right?!
+        // How would it look like? "package;"
+    }
+
+    @Test
     public void conflictingAnnotations() {
         process("-AversionName=" + expectedVersion, clazzInput, packageInputDifferentField)
             .failsToCompile()
@@ -140,11 +173,18 @@ public class VersionNameNameProcessorTest {
     }
 
     private JavaFileObject expectedOutput(String className, String fieldName) {
-        return JavaFileObjects.forSourceString(
-            //"com.example.VersionName",
+       return expectedOutput(className, fieldName, "com.example");
+    }
+
+    private JavaFileObject expectedOutput(String className, String fieldName, String packageName) {
+        String optionalPackage = "";
+        if (!packageName.isEmpty()) {
+            optionalPackage = "package " + packageName + ";";
+        }
+        JavaFileObject src = JavaFileObjects.forSourceString(
             "VersionName",
             Joiner.on(System.lineSeparator()).join(
-                "package com.example;",
+                optionalPackage,
                 "",
                 "import java.lang.String;",
                 "",
@@ -155,5 +195,6 @@ public class VersionNameNameProcessorTest {
                 "}"
             )
         );
+        return src;
     }
 }

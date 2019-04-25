@@ -60,7 +60,6 @@ public class VersionNameProcessor extends AbstractProcessor {
 
     private void writeVersionClass(String versionName, VersionName versionNameAnnotation, Element element) throws IOException {
         Filer filer = processingEnv.getFiler();
-        // TODO what about root package?
         String packageName = findPackageName(element);
 
         TypeSpec VersionClass = TypeSpec.classBuilder(versionNameAnnotation.className())
@@ -76,11 +75,24 @@ public class VersionNameProcessor extends AbstractProcessor {
 
     private String findPackageName(Element element) {
         if (element.getEnclosingElement() != null) {
-            // Class
-            return element.getEnclosingElement().toString();
+            return findPackageNameForClass(element);
         }
-        // Package
+        return findPackageNameForPackage(element);
+    }
+
+    private String findPackageNameForPackage(Element element) {
         return element.toString();
+    }
+
+    private String findPackageNameForClass(Element element) {
+        if (element.getEnclosingElement().getSimpleName().toString().isEmpty()) {
+            return findPackageNameForClassInDefaultPackage();
+        }
+        return element.getEnclosingElement().toString();
+    }
+
+    private String findPackageNameForClassInDefaultPackage() {
+        return "";
     }
 
     private void error(IOException e) {
