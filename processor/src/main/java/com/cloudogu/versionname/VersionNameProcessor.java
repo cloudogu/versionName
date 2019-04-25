@@ -28,26 +28,42 @@ import java.util.Set;
 @MetaInfServices(Processor.class)
 public class VersionNameProcessor extends AbstractProcessor {
 
+    private static final boolean CLAIM_ANNOTATIONS = true;
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        // TODO make this code clean
+
         for (TypeElement annotation : annotations) {
-            for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
-                VersionName[] annotationInstances = element.getAnnotationsByType(VersionName.class);
-                for (VersionName annotationInstance : annotationInstances) {
-
-                    try {
-                        String versionName = readAndValidateVersionNameFromCompilerArg();
-
-                        writeVersionClass(versionName, annotationInstance, element);
-
-                    } catch (IOException e) {
-                        error(e);
-                    }
-                }
-            }
+            processAnnotatedElements(roundEnv.getElementsAnnotatedWith(annotation));
         }
-        return true;
+
+        return CLAIM_ANNOTATIONS;
+    }
+
+    private void processAnnotatedElements(Set<? extends Element> annotatedElements) {
+
+        for (Element annotatedElement : annotatedElements) {
+            processAnnotationInstances(annotatedElement.getAnnotationsByType(VersionName.class), annotatedElement);
+        }
+    }
+
+    private void processAnnotationInstances(VersionName[] annotationInstances, Element annotatedElement) {
+
+        for (VersionName annotationInstance : annotationInstances) {
+            processAnnotationInstance(annotationInstance, annotatedElement);
+        }
+    }
+
+    private void processAnnotationInstance(VersionName annotationInstance, Element annotatedElement) {
+
+        try {
+            String versionName = readAndValidateVersionNameFromCompilerArg();
+
+            writeVersionClass(versionName, annotationInstance, annotatedElement);
+
+        } catch (IOException e) {
+            error(e);
+        }
     }
 
     private String readAndValidateVersionNameFromCompilerArg() throws IOException {
