@@ -11,7 +11,7 @@ import org.junit.Test;
 import javax.tools.JavaFileObject;
 import java.util.Arrays;
 
-public class VersionNameNameProcessorTest {
+public class VersionNameProcessorTest {
 
     private static final String DEFAULT_CLASS_NAME = "Version";
     private static final String DEFAULT_FIELD_NAME = "NAME";
