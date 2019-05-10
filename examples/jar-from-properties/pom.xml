@@ -32,20 +32,33 @@
         <version>2.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jar</artifactId>
-    <name>versionName-examples-jar</name>
+    <artifactId>jar-from-properties</artifactId>
+    <name>versionName-examples-jar-from-properties</name>
 
     <packaging>jar</packaging>
 
     <properties>
-        <mainClass>com.cloudogu.versionname.AppWithoutDeps</mainClass>
+        <mainClass>com.cloudogu.versionname.App</mainClass>
     </properties>
 
     <build>
+
+        <resources>
+            <resource>
+                <!-- Filter for version name in properties -->
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>app.properties</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -58,6 +71,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

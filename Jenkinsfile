@@ -7,7 +7,7 @@ node { // No specific label
     def mvnHome = tool 'M3'
     javaHome = tool 'JDK8'
 
-    Maven mvn = new MavenLocal(this, mvnHome, javaHome)
+    mvn = new MavenLocal(this, mvnHome, javaHome)
 
     catchError {
 
@@ -18,23 +18,22 @@ node { // No specific label
         initMaven(mvn)
 
         stage('Build') {
-            mvn 'clean install'
+            mvn 'clean package -DskipTests'
+
+            archiveArtifacts '**/target/*.*ar'
         }
 
-        stage('Print version number') {
-            def actualVersionNumber = java "-jar examples/jar/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
-            echo "Returned version number: ${actualVersionNumber}"
-            assert actualVersionNumber.contains(mvn.version)
+        stage('Test') {
+            mvn'test'
+        }
 
-            docker.image('openjdk:8u102-jre').inside {
-                actualVersionNumber = java "-jar examples/jar/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
-                echo "Returned version number: ${actualVersionNumber}"
-                assert actualVersionNumber.contains(mvn.version)
-            }
+        stage('Integration Test') {
 
-            actualVersionNumber = java "-jar examples/jar-without-deps/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
-            echo "Returned version number: ${actualVersionNumber}"
-            assert actualVersionNumber.contains(mvn.version)
+            readsFromManifestInJar()
+            readsFromManifestInJarOpenJdk()
+            readsFromPropertiesInJar()
+            readsFromGeneratedFileInJar()
+            readsFromPropertiesInWar()
         }
 
         stage('Statical Code Analysis') {
@@ -68,6 +67,7 @@ node { // No specific label
 }
 
 def javaHome
+def mvn
 
 def java(def args) {
     withEnv(["PATH+EXTRA=${javaHome}/jre/bin"]) {
@@ -105,4 +105,93 @@ void initMaven(Maven mvn) {
         mvn.additionalArgs += " -DperformRelease "
         currentBuild.description = mvn.getVersion()
     }
+}
+
+
+void readsFromManifestInJar() {
+    echo "Test: readsFromManifestInJar"
+    testJarFromManifest()
+}
+
+void readsFromManifestInJarOpenJdk() {
+    echo "Test: readsFromManifestInJarOpenJdk"
+    docker.image('openjdk:8u102-jre').inside {
+        testJarFromManifest()
+    }
+}
+
+void readsFromPropertiesInJar() {
+    echo "Test: readsFromPropertiesInJar"
+    testJarFromProperties()
+}
+
+void readsFromGeneratedFileInJar() {
+    echo "Test: readsFromGeneratedFileInJar"
+
+    testJarFromGeneratedFile()
+}
+
+void readsFromPropertiesInWar() {
+    echo "Test: readsFromPropertiesInWarOpenJdk"
+
+    uid = findUid()
+    gid = findGid()
+
+    docker.image('openjdk:8u102-jre').withRun(
+        "-v ${WORKSPACE}:/v -w /v/examples " +
+            // Run with Jenkins user, so the files created in the workspace by server can be deleted later
+            "-u ${uid}:${gid} -e HOST_UID=${uid} -e HOST_GID=${gid} ",
+        "java -jar server/target/server-${mvn.version}-jar-with-dependencies.jar") {
+        serverContainer ->
+            echo "serverContainer: ${serverContainer.id}"
+
+            def inspect = sh (returnStdout: true, script: "docker inspect ${serverContainer.id}")
+            echo "inspect: ${inspect}"
+            def logs = sh (returnStdout: true, script: "docker logs ${serverContainer.id}")
+            echo "logs: ${logs}"
+
+            def serverIp = findContainerIp(serverContainer)
+            // Make sure server Is Up
+            sleep(time: 5, unit: 'SECONDS')
+            actualVersionNumber = sh(script: "curl http://${serverIp}:8080/api/version", returnStdout: true).trim()
+            assertVersionNumber(actualVersionNumber)
+    }
+}
+
+void testJarFromManifest() {
+    actualVersionNumber = java "-jar examples/jar-from-manifest/target/jar-*-jar-with-dependencies.jar"
+    assertVersionNumber(actualVersionNumber)
+}
+
+void testJarFromProperties() {
+    actualVersionNumber = java "-jar examples/jar-from-properties/target/jar-*-jar-with-dependencies.jar"
+    assertVersionNumber(actualVersionNumber)
+}
+
+void testJarFromGeneratedFile() {
+    actualVersionNumber = java "-jar examples/jar-without-deps/target/jar-*-jar-with-dependencies.jar"
+    assertVersionNumber(actualVersionNumber)
+}
+
+private void assertVersionNumber(actualVersionNumber) {
+    echo "Returned version number: ${actualVersionNumber}"
+    echo "Expected version number: ${mvn.version}"
+    assert actualVersionNumber.contains(mvn.version)
+}
+
+String findContainerIp(container) {
+    sh (returnStdout: true,
+        script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container.id}")
+        .trim()
+}
+
+String findUid() {
+    sh (returnStdout: true,
+        script: 'id -u')
+        .trim()
+}
+String findGid() {
+    sh (returnStdout: true,
+        script: 'id -g')
+        .trim()
 }

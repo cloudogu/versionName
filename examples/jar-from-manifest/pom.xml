@@ -31,12 +31,14 @@
         <artifactId>versionName-examples</artifactId>
         <version>2.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>server</artifactId>
-    <name>versionName-examples-server</name>
+
+    <artifactId>jar-from-manifest</artifactId>
+    <name>versionName-examples-jar-from-manifest</name>
+
+    <packaging>jar</packaging>
 
     <properties>
-        <jetty-version>9.4.18.v20190429</jetty-version>
-        <mainClass>com.cloudogu.versionname.ServerMain</mainClass>
+        <mainClass>com.cloudogu.versionname.AppWithoutDeps</mainClass>
     </properties>
 
     <build>
@@ -52,6 +54,7 @@
                     </archive>
                 </configuration>
             </plugin>
+            <!-- Build a jar that contains the dependency to versionName module, to keep it simple -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -65,6 +68,10 @@
                 </executions>
                 <configuration>
                     <archive>
+                        <!-- Add version name to manifest -->
+                        <manifestEntries>
+                            <versionName>${versionName}</versionName>
+                        </manifestEntries>
                         <manifest>
                             <mainClass>${mainClass}</mainClass>
                         </manifest>
@@ -77,33 +84,19 @@
         </plugins>
     </build>
 
-
     <dependencies>
+        <!-- Load version name from file -->
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>${jetty-version}</version>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>versionName</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
+
+        <!-- Don't use logging here-->
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>${jetty-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-webapp</artifactId>
-            <version>${jetty-version}</version>
-        </dependency>
-        <!-- Make jetty process (JAX-RS/Servlet) annotations -->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-annotations</artifactId>
-            <version>${jetty-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-plus</artifactId>
-            <version>${jetty-version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.21</version>
         </dependency>
     </dependencies>
 </project>
