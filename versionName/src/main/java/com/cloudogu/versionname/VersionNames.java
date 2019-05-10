@@ -29,9 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Properties;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -41,6 +39,13 @@ import java.util.jar.Manifest;
 public class VersionNames {
 
     private static final Logger LOG = LoggerFactory.getLogger(VersionNames.class);
+
+    // Defines which strategies are used and the order in which they are used
+    private static final List<LoadingStrategy> LOADING_STRATEGIES = Arrays.asList(
+        new GetResourcesLoadingStrategy(),
+        new GetSingleResourceLoadingStrategy(),
+        new RelativePathLoadingStrategy()
+    );
 
     /**
      * The path of the properties file that is used for looking up the version name by default.
@@ -230,8 +235,21 @@ public class VersionNames {
         }
 
         private Enumeration<URL> getResources(String resourcePath) {
+
+            for (LoadingStrategy loadingStrategy : LOADING_STRATEGIES) {
+                Enumeration<URL> potentialResources = tryLoading(resourcePath, loadingStrategy);
+
+                if (potentialResources.hasMoreElements()) {
+                    return potentialResources;
+                }
+            }
+
+            return Collections.enumeration(Collections.emptyList());
+        }
+
+        private Enumeration<URL> tryLoading(String resourcePath, LoadingStrategy loadingStrategy) {
             try {
-                return Thread.currentThread().getContextClassLoader().getResources(resourcePath);
+                return loadingStrategy.getResources(resourcePath);
             } catch (IOException e) {
                 LOG.error(LOG_EXCEPTION_GETTING_MANIFESTS_FROM_CLASSPATH, resourcePath, e);
                 return Collections.enumeration(Collections.emptyList());
@@ -248,5 +266,55 @@ public class VersionNames {
             }
         }
     }
+
+    private interface LoadingStrategy {
+        Enumeration<URL> getResources(String resourcePath) throws IOException;
+    }
+
+    /**
+     * Should match most cases
+     */
+    private static class GetResourcesLoadingStrategy implements LoadingStrategy {
+
+        @Override
+        public Enumeration<URL> getResources(String resourcePath) throws IOException {
+            return Thread.currentThread().getContextClassLoader().getResources(resourcePath);
+        }
+    }
+
+    /**
+     * Use case: Read Properties file in war.
+     * The property file is not found when using "getResourceS()", only when using "getResource()".
+     */
+    private static class GetSingleResourceLoadingStrategy implements LoadingStrategy {
+
+        @Override
+        public Enumeration<URL> getResources(String resourcePath) throws IOException {
+            URL singleResource = Thread.currentThread().getContextClassLoader().getResource(resourcePath);
+            if (singleResource != null) {
+                return  Collections.enumeration(Collections.singletonList(singleResource));
+            } else {
+                return Collections.enumeration(Collections.emptyList());
+            }
+        }
+    }
+
+    /**
+     * Use case: Read Properties file in jar
+     * The property file is not found at e.g. "/app.properties" but at "app.properties".
+     */
+    private static class RelativePathLoadingStrategy implements LoadingStrategy {
+
+        @Override
+        public Enumeration<URL> getResources(String resourcePath) throws IOException {
+            if (resourcePath.startsWith("/")) {
+                String resourceAtRelativePath = resourcePath.replaceFirst("/", "");
+                URL singleResource = Thread.currentThread().getContextClassLoader().getResource(resourceAtRelativePath);
+                if (singleResource != null) {
+                    return Collections.enumeration(Collections.singletonList(singleResource));
+                }
+            }
+            return Collections.enumeration(Collections.emptyList());
+        }}
 }
 
