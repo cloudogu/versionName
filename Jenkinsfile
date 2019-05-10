@@ -8,6 +8,7 @@ node { // No specific label
     javaHome = tool 'JDK8'
 
     Maven mvn = new MavenLocal(this, mvnHome, javaHome)
+    expectedVersion = mvn.version
 
     catchError {
 
@@ -18,19 +19,21 @@ node { // No specific label
         initMaven(mvn)
 
         stage('Build') {
-            mvn 'clean install'
+            mvn 'clean package -DskipTests'
+
+            archiveArtifacts '**/target/*.*ar'
         }
 
-        stage('Print version number') {
-            def actualVersionNumber = java "-jar examples/jar-from-manifest/target/jar-*-jar-with-dependencies.jar"
-            echo "Returned version number: ${actualVersionNumber}"
-            assert actualVersionNumber.contains(mvn.version)
+        stage('Test') {
+            mvn'test'
+        }
 
-            docker.image('openjdk:8u102-jre').inside {
-                actualVersionNumber = java "-jar examples/jar-from-manifest/target/jar-*-jar-with-dependencies.jar"
-                echo "Returned version number: ${actualVersionNumber}"
-                assert actualVersionNumber.contains(mvn.version)
-            }
+        stage('Integration Test') {
+
+            readsFromManifestInJarLocalJava()
+            readsFromManifestInJarOpenJdk()
+
+            //TODO test jar properties, website and REST api
         }
 
         stage('Statical Code Analysis') {
@@ -64,6 +67,7 @@ node { // No specific label
 }
 
 def javaHome
+String expectedVersion
 
 def java(def args) {
     withEnv(["PATH+EXTRA=${javaHome}/jre/bin"]) {
@@ -101,4 +105,21 @@ void initMaven(Maven mvn) {
         mvn.additionalArgs += " -DperformRelease "
         currentBuild.description = mvn.getVersion()
     }
+}
+
+
+void readsFromManifestInJarLocalJava() {
+        testJarFromManifest()
+}
+
+void readsFromManifestInJarOpenJdk() {
+    docker.image('openjdk:8u102-jre').inside {
+        testJarFromManifest()
+    }
+}
+
+void testJarFromManifest() {
+    actualVersionNumber = java "-jar examples/jar-from-manifest/target/jar-*-jar-with-dependencies.jar"
+    echo "Returned version number: ${actualVersionNumber}"
+    assert actualVersionNumber.contains(expectedVersion)
 }
