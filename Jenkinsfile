@@ -7,8 +7,7 @@ node { // No specific label
     def mvnHome = tool 'M3'
     javaHome = tool 'JDK8'
 
-    Maven mvn = new MavenLocal(this, mvnHome, javaHome)
-    expectedVersion = mvn.version
+    mvn = new MavenLocal(this, mvnHome, javaHome)
 
     catchError {
 
@@ -32,8 +31,8 @@ node { // No specific label
 
             readsFromManifestInJarLocalJava()
             readsFromManifestInJarOpenJdk()
-
-            //TODO test jar properties, website and REST api
+            readsFromPropertiesInJarOpenJdk()
+            readsFromPropertiesInWarOpenJdk()
         }
 
         stage('Statical Code Analysis') {
@@ -67,7 +66,7 @@ node { // No specific label
 }
 
 def javaHome
-String expectedVersion
+def mvn
 
 def java(def args) {
     withEnv(["PATH+EXTRA=${javaHome}/jre/bin"]) {
@@ -113,13 +112,58 @@ void readsFromManifestInJarLocalJava() {
 }
 
 void readsFromManifestInJarOpenJdk() {
+    echo "Test: readsFromManifestInJarOpenJdk"
     docker.image('openjdk:8u102-jre').inside {
         testJarFromManifest()
     }
 }
 
+void readsFromPropertiesInJarOpenJdk() {
+    echo "Test: readsFromPropertiesInJarOpenJdk"
+    docker.image('openjdk:8u102-jre').inside {
+        testJarFromProperties()
+    }
+}
+
+void readsFromPropertiesInWarOpenJdk() {
+    echo "Test: readsFromPropertiesInJarOpenJdk"
+    docker.image('openjdk:8u102-jre').withRun(
+        "-v ${WORKSPACE}:/v -w /v/examples",
+        "java -jar server/target/server-${mvn.version}-jar-with-dependencies.jar") {
+        serverContainer ->
+            echo "serverContainer: ${serverContainer.id}"
+
+            def inspect = sh (returnStdout: true, script: "docker inspect ${serverContainer.id}")
+            echo "inspect: ${inspect}"
+            def logs = sh (returnStdout: true, script: "docker logs ${serverContainer.id}")
+            echo "logs: ${logs}"
+
+            def serverIp = findContainerIp(serverContainer)
+            // Make sure server Is Up
+            sleep(time: 5, unit: 'SECONDS')
+            actualVersionNumber = sh(script: "curl http://${serverIp}:8080/api/version", returnStdout: true).trim()
+            assertVersionNumber(actualVersionNumber)
+    }
+}
+
 void testJarFromManifest() {
     actualVersionNumber = java "-jar examples/jar-from-manifest/target/jar-*-jar-with-dependencies.jar"
+    assertVersionNumber(actualVersionNumber)
+}
+
+void testJarFromProperties() {
+    actualVersionNumber = java "-jar examples/jar-from-properties/target/jar-*-jar-with-dependencies.jar"
+    assertVersionNumber(actualVersionNumber)
+}
+
+private void assertVersionNumber(actualVersionNumber) {
     echo "Returned version number: ${actualVersionNumber}"
-    assert actualVersionNumber.contains(expectedVersion)
+    echo "Expected version number: ${mvn.version}"
+    assert actualVersionNumber.contains(mvn.version)
+}
+
+String findContainerIp(container) {
+    sh (returnStdout: true,
+        script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container.id}")
+        .trim()
 }
