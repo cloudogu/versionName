@@ -22,12 +22,12 @@ node { // No specific label
         }
 
         stage('Print version number') {
-            def actualVersionNumber = java "-jar examples/jar/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
+            def actualVersionNumber = java "-jar examples/jar-from-manifest/target/jar-*-jar-with-dependencies.jar"
             echo "Returned version number: ${actualVersionNumber}"
             assert actualVersionNumber.contains(mvn.version)
 
             docker.image('openjdk:8u102-jre').inside {
-                actualVersionNumber = java "-jar examples/jar/target/jar-${mvn.getVersion()}-jar-with-dependencies.jar"
+                actualVersionNumber = java "-jar examples/jar-from-manifest/target/jar-*-jar-with-dependencies.jar"
                 echo "Returned version number: ${actualVersionNumber}"
                 assert actualVersionNumber.contains(mvn.version)
             }

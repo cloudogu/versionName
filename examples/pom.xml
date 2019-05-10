@@ -103,7 +103,8 @@
     </build>
 
     <modules>
-        <module>jar</module>
+        <module>jar-from-manifest</module>
+        <module>jar-from-properties</module>
         <module>war</module>
         <module>server</module>
     </modules>

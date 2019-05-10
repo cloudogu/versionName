@@ -32,8 +32,8 @@
         <version>2.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jar</artifactId>
-    <name>versionName-examples-jar</name>
+    <artifactId>jar-from-properties</artifactId>
+    <name>versionName-examples-jar-from-properties</name>
 
     <packaging>jar</packaging>
 
@@ -42,6 +42,18 @@
     </properties>
 
     <build>
+
+        <resources>
+            <resource>
+                <!-- Filter for version name in properties -->
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>app.properties</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
