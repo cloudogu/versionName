@@ -29,10 +29,10 @@ node { // No specific label
 
         stage('Integration Test') {
 
-            readsFromManifestInJarLocalJava()
+            readsFromManifestInJar()
             readsFromManifestInJarOpenJdk()
-            readsFromPropertiesInJarOpenJdk()
-            readsFromPropertiesInWarOpenJdk()
+            readsFromPropertiesInJar()
+            readsFromPropertiesInWar()
         }
 
         stage('Statical Code Analysis') {
@@ -107,8 +107,9 @@ void initMaven(Maven mvn) {
 }
 
 
-void readsFromManifestInJarLocalJava() {
-        testJarFromManifest()
+void readsFromManifestInJar() {
+    echo "Test: readsFromManifestInJar"
+    testJarFromManifest()
 }
 
 void readsFromManifestInJarOpenJdk() {
@@ -118,17 +119,21 @@ void readsFromManifestInJarOpenJdk() {
     }
 }
 
-void readsFromPropertiesInJarOpenJdk() {
-    echo "Test: readsFromPropertiesInJarOpenJdk"
-    docker.image('openjdk:8u102-jre').inside {
-        testJarFromProperties()
-    }
+void readsFromPropertiesInJar() {
+    echo "Test: readsFromPropertiesInJar"
+    testJarFromProperties()
 }
 
-void readsFromPropertiesInWarOpenJdk() {
-    echo "Test: readsFromPropertiesInJarOpenJdk"
+void readsFromPropertiesInWar() {
+    echo "Test: readsFromPropertiesInWarOpenJdk"
+
+    uid = findUid()
+    gid = findGid()
+
     docker.image('openjdk:8u102-jre').withRun(
-        "-v ${WORKSPACE}:/v -w /v/examples",
+        "-v ${WORKSPACE}:/v -w /v/examples " +
+        // Run with Jenkins user, so the files created in the workspace by server can be deleted later
+        "-u ${uid}:${gid} -e HOST_UID=${uid} -e HOST_GID=${gid} ",
         "java -jar server/target/server-${mvn.version}-jar-with-dependencies.jar") {
         serverContainer ->
             echo "serverContainer: ${serverContainer.id}"
@@ -165,5 +170,17 @@ private void assertVersionNumber(actualVersionNumber) {
 String findContainerIp(container) {
     sh (returnStdout: true,
         script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container.id}")
+        .trim()
+}
+
+
+String findUid() {
+    sh (returnStdout: true,
+        script: 'id -u')
+        .trim()
+}
+String findGid() {
+    sh (returnStdout: true,
+        script: 'id -g')
         .trim()
 }
