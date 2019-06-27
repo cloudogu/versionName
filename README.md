@@ -63,8 +63,7 @@ then generated into the same package when the following dependency is added to t
 <dependency>
     <groupId>com.cloudogu.versionName</groupId>
     <artifactId>processor</artifactId>
-       <version>2.0.0</version>
-   </dependency>
+    <version>2.1.0</version>
     <!-- This dependency is only needed during compile time and should not be packaged into final JAR -->
     <scope>provided</scope>
 </dependency>
