@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Cloudogu GmbH
+ * Copyright (c) 2017 Cloudogu GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+
 package com.cloudogu.versionname;
 
-import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class App {
-    public static void main(String[] args) throws IOException {
-        System.out.println(VersionNames.getVersionNameFromManifest());
-    }
+@Target({ElementType.TYPE, ElementType.PACKAGE})
+@Retention(RetentionPolicy.CLASS)
+public @interface VersionName {
+    /**
+     * Output constants class name.
+     *
+     * @return Class name.
+     */
+    String className() default "Version";
+
+    /**
+     * Output constants field name.
+     *
+     * @return field name.
+     */
+    String fieldName() default "NAME";
 }

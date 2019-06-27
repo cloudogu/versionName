@@ -24,7 +24,8 @@
     SOFTWARE.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.cloudogu.versionName</groupId>
@@ -32,17 +33,29 @@
         <version>2.0.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jar-from-manifest</artifactId>
-    <name>versionName-examples-jar-from-manifest</name>
+    <artifactId>jar-without-deps</artifactId>
+    <name>versionName-examples-jar-without-deps</name>
+    <description>versionName without versionName dependencies, using annotation processor</description>
 
     <packaging>jar</packaging>
 
     <properties>
-        <mainClass>com.cloudogu.versionname.App</mainClass>
+        <mainClass>com.cloudogu.versionname.AppWithoutDeps</mainClass>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-AversionName=${versionName}</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -68,10 +81,6 @@
                 </executions>
                 <configuration>
                     <archive>
-                        <!-- Add version name to manifest -->
-                        <manifestEntries>
-                            <versionName>${versionName}</versionName>
-                        </manifestEntries>
                         <manifest>
                             <mainClass>${mainClass}</mainClass>
                         </manifest>
@@ -85,11 +94,13 @@
     </build>
 
     <dependencies>
-        <!-- Load version name from file -->
+        <!-- Process VersionName Dependency -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
-            <artifactId>versionName</artifactId>
+            <artifactId>processor</artifactId>
             <version>${project.parent.version}</version>
+            <!-- This dependency is only needed during compile time and should not be packaged into final JAR -->
+            <scope>provided</scope>
         </dependency>
 
         <!-- Don't use logging here-->

@@ -107,5 +107,6 @@
         <module>jar-from-properties</module>
         <module>war</module>
         <module>server</module>
+        <module>jar-without-deps</module>
     </modules>
 </project>
