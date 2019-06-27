@@ -38,7 +38,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <mainClass>com.cloudogu.versionname.AppWithoutDeps</mainClass>
+        <mainClass>com.cloudogu.versionname.App</mainClass>
     </properties>
 
     <build>

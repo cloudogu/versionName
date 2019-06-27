@@ -41,8 +41,8 @@
 
     <properties>
         <mainClass>com.cloudogu.versionname.AppWithoutDeps</mainClass>
-            <maven.compiler.source>1.8</maven.compiler.source>
-            <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <build>
