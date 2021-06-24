@@ -1,13 +1,14 @@
 #!groovy
-@Library('github.com/cloudogu/ces-build-lib@a4e0212')
+@Library('github.com/cloudogu/ces-build-lib@1.47.0')
 import com.cloudogu.ces.cesbuildlib.*
 
 node { // No specific label
 
-    def mvnHome = tool 'M3'
     javaHome = tool 'JDK8'
-
-    mvn = new MavenLocal(this, mvnHome, javaHome)
+    mvn = new MavenWrapper(this, javaHome)
+    // Sonar stopped support for JRE8 for its client, so for now we run the analysis in a separate container.
+    // Once the lib is upgraded to JDK11 this can be removed
+    String SonarJreImage = 'adoptopenjdk/openjdk11:jre-11.0.11_9-alpine'
 
     catchError {
 
@@ -29,6 +30,7 @@ node { // No specific label
 
         stage('Integration Test') {
 
+            expectedVersion = mvn.version
             readsFromManifestInJar()
             readsFromManifestInJarOpenJdk()
             readsFromPropertiesInJar()
@@ -37,14 +39,16 @@ node { // No specific label
         }
 
         stage('Statical Code Analysis') {
-            dir('versionName') { // Scan only the library module
-                def sonarQube = new SonarCloud(this, [sonarQubeEnv: 'sonarcloud.io-cloudogu'])
+            def sonarQube = new SonarCloud(this, [sonarQubeEnv: 'sonarcloud.io-cloudogu'])
 
-                sonarQube.analyzeWith(mvn)
+            // Scan only the library module
+            def sonarMaven = new MavenWrapperInDocker(this, SonarJreImage)
+            sonarMaven.additionalArgs = ' sonar.includedModules=versionName-parent,versionName'
+            sonarMaven.useLocalRepoFromJenkins = true
+            sonarQube.analyzeWith(sonarMaven)
 
-                if (!sonarQube.waitForQualityGateWebhookToBeCalled()) {
-                    currentBuild.result = 'UNSTABLE'
-                }
+            if (!sonarQube.waitForQualityGateWebhookToBeCalled()) {
+                currentBuild.result = 'UNSTABLE'
             }
         }
 
@@ -141,7 +145,7 @@ void readsFromPropertiesInWar() {
         "-v ${WORKSPACE}:/v -w /v/examples " +
             // Run with Jenkins user, so the files created in the workspace by server can be deleted later
             "-u ${uid}:${gid} -e HOST_UID=${uid} -e HOST_GID=${gid} ",
-        "java -jar server/target/server-${mvn.version}-jar-with-dependencies.jar") {
+        "java -jar server/target/server-${expectedVersion}-jar-with-dependencies.jar") {
         serverContainer ->
             echo "serverContainer: ${serverContainer.id}"
 
@@ -175,8 +179,8 @@ void testJarFromGeneratedFile() {
 
 private void assertVersionNumber(actualVersionNumber) {
     echo "Returned version number: ${actualVersionNumber}"
-    echo "Expected version number: ${mvn.version}"
-    assert actualVersionNumber.contains(mvn.version)
+    echo "Expected version number: ${expectedVersion}"
+    assert actualVersionNumber.contains(expectedVersion)
 }
 
 String findContainerIp(container) {
@@ -195,3 +199,5 @@ String findGid() {
         script: 'id -g')
         .trim()
 }
+
+String expectedVersion
