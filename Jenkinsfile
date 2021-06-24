@@ -41,15 +41,13 @@ node { // No specific label
         stage('Statical Code Analysis') {
             def sonarQube = new SonarCloud(this, [sonarQubeEnv: 'sonarcloud.io-cloudogu'])
 
-            // Scan only the library module
-            def sonarMaven = new MavenWrapperInDocker(this, SonarJreImage)
-            sonarMaven.additionalArgs = ' sonar.includedModules=versionName-parent,versionName'
-            sonarMaven.useLocalRepoFromJenkins = true
-            sonarQube.analyzeWith(sonarMaven)
+            // Running SQ with JDK11 when the app requires JDK8 is tricky.
+            // Enable, once the app is migrated to run with JDK11
+/*            sonarQube.analyzeWith(mvn)
 
             if (!sonarQube.waitForQualityGateWebhookToBeCalled()) {
                 currentBuild.result = 'UNSTABLE'
-            }
+            }*/
         }
 
         stage('Deploy') {
