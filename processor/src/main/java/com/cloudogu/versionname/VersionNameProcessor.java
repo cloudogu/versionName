@@ -76,7 +76,11 @@ public class VersionNameProcessor extends AbstractProcessor {
 
     private void writeVersionClass(String versionName, VersionName versionNameAnnotation, Element element) throws IOException {
         Filer filer = processingEnv.getFiler();
-        String packageName = findPackageName(element);
+
+        String packageName = versionNameAnnotation.packageName();
+        if (packageName.isEmpty()) {
+            packageName = findPackageName(element);
+        }
 
         TypeSpec VersionClass = TypeSpec.classBuilder(versionNameAnnotation.className())
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)

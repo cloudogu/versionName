@@ -46,4 +46,11 @@ public @interface VersionName {
      * @return field name.
      */
     String fieldName() default "NAME";
+    /**
+     * Package to put the class in.
+     * Empty leads to discovery of path or no package.
+     *
+     * @return package name.
+     */
+    String packageName() default "";
 }

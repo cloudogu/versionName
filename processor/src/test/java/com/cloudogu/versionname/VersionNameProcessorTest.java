@@ -15,8 +15,10 @@ public class VersionNameProcessorTest {
 
     private static final String DEFAULT_CLASS_NAME = "Version";
     private static final String DEFAULT_FIELD_NAME = "NAME";
+    private static final String DEFAULT_PACKAGE_NAME = "com.example";
     private static final String OTHER_FIELD_NAME = "OTHER";
     private static final String OTHER_CLASS_NAME = "Other";
+    private static final String OTHER_PACKAGE_NAME = "com.other";
 
     private String expectedErrorMissingCompilerArg = "Compile Arg \"versionName\" not set.";
     private String expectedVersion = "1.2.3";
@@ -77,6 +79,14 @@ public class VersionNameProcessorTest {
             "import com.cloudogu.versionname.VersionName;"
         )
     );
+    private final JavaFileObject packageInputDifferentPackage = JavaFileObjects.forSourceString(
+        "com.example.package-info",
+        Joiner.on(System.lineSeparator()).join(
+            "@VersionName(packageName = \"" + OTHER_PACKAGE_NAME + "\")",
+            "package com.example;",
+            "import com.cloudogu.versionname.VersionName;"
+        )
+    );
 
     private final JavaFileObject packageInputDifferentClass = JavaFileObjects.forSourceString(
         "com.example.package-info",
@@ -113,6 +123,22 @@ public class VersionNameProcessorTest {
 
     @Test
     public void differentClass() {
+        process("-AversionName=" + expectedVersion, packageInputDifferentClass)
+            .compilesWithoutError()
+            .and()
+            .generatesSources(expectedOutput(OTHER_CLASS_NAME, DEFAULT_FIELD_NAME));
+    }
+
+    @Test
+    public void packageViaParameter() {
+        process("-AversionName=" + expectedVersion, packageInputDifferentPackage)
+            .compilesWithoutError()
+            .and()
+            .generatesSources(expectedOutput(DEFAULT_CLASS_NAME, DEFAULT_FIELD_NAME, OTHER_PACKAGE_NAME));
+    }
+
+    @Test
+    public void differentPackage() {
         process("-AversionName=" + expectedVersion, packageInputDifferentClass)
             .compilesWithoutError()
             .and()
@@ -169,11 +195,11 @@ public class VersionNameProcessorTest {
     }
 
     private JavaFileObject expectedOutput() {
-        return expectedOutput(DEFAULT_CLASS_NAME, DEFAULT_FIELD_NAME);
+        return expectedOutput(DEFAULT_CLASS_NAME, DEFAULT_FIELD_NAME, DEFAULT_PACKAGE_NAME);
     }
 
     private JavaFileObject expectedOutput(String className, String fieldName) {
-       return expectedOutput(className, fieldName, "com.example");
+       return expectedOutput(className, fieldName, DEFAULT_PACKAGE_NAME);
     }
 
     private JavaFileObject expectedOutput(String className, String fieldName, String packageName) {

@@ -4,10 +4,11 @@ import com.cloudogu.ces.cesbuildlib.*
 
 node { // No specific label
 
-    Maven mvn = new MavenWrapper(this)
+    javaImage = 'eclipse-temurin:8-jdk-alpine'
+    Maven mvn = new MavenWrapperInDocker(this, addGitToImage(javaImage))
     // Sonar stopped support for JRE8 for its client, so for now we run the analysis in a separate container.
     // Once the lib is upgraded to JDK11 this can be removed
-    String SonarJreImage = 'adoptopenjdk/openjdk11:jre-11.0.11_9-alpine'
+    String SonarJreImage = 'eclipse-temurin:11-jdk-alpine'
 
     catchError {
 
@@ -31,7 +32,6 @@ node { // No specific label
 
             expectedVersion = mvn.version
             readsFromManifestInJar()
-            readsFromManifestInJarOpenJdk()
             readsFromPropertiesInJar()
             readsFromGeneratedFileInJar()
             readsFromPropertiesInWar()
@@ -67,13 +67,29 @@ node { // No specific label
     mailIfStatusChanged(findEmailRecipients(env.EMAIL_RECIPIENTS))
 }
 
-def javaHome
 def mvn
+String javaImage
+
+/** Our maven build needs git binary for some examples */
+def addGitToImage(String image) {
+    withTempDir {
+        writeFile file: 'Dockerfile', text: "FROM ${image}\nRUN apk add git --no-cache"
+        return docker.build("${env.BUILD_TAG}-${image}-git".toLowerCase()).imageName()
+    }
+}
+
+void withTempDir(Closure body) {
+    dir( "${env.BUILD_TAG}-${System.currentTimeMillis()}" ) {
+        try {
+            body()
+        } finally {
+            deleteDir()
+        }
+    }
+}
 
 def java(def args) {
-    withEnv(["PATH+EXTRA=${javaHome}/jre/bin"]) {
-        return sh(returnStdout: true, script: "java ${args}")
-    }
+    return sh(returnStdout: true, script: "java ${args}")
 }
 
 boolean preconditionsForDeploymentFulfilled() {
@@ -108,37 +124,35 @@ void initMaven(Maven mvn) {
     }
 }
 
-
 void readsFromManifestInJar() {
     echo "Test: readsFromManifestInJar"
-    testJarFromManifest()
-}
-
-void readsFromManifestInJarOpenJdk() {
-    echo "Test: readsFromManifestInJarOpenJdk"
-    docker.image('openjdk:8u102-jre').inside {
+    docker.image(javaImage).inside {
         testJarFromManifest()
     }
 }
 
 void readsFromPropertiesInJar() {
     echo "Test: readsFromPropertiesInJar"
-    testJarFromProperties()
+    docker.image(javaImage).inside {
+        testJarFromProperties()
+    }
 }
 
 void readsFromGeneratedFileInJar() {
     echo "Test: readsFromGeneratedFileInJar"
 
-    testJarFromGeneratedFile()
+    docker.image(javaImage).inside {
+        testJarFromGeneratedFile()
+    }
 }
 
 void readsFromPropertiesInWar() {
-    echo "Test: readsFromPropertiesInWarOpenJdk"
+    echo "Test: readsFromPropertiesInWar"
 
     uid = findUid()
     gid = findGid()
 
-    docker.image('openjdk:8u102-jre').withRun(
+    docker.image(javaImage).withRun(
         "-v ${WORKSPACE}:/v -w /v/examples " +
             // Run with Jenkins user, so the files created in the workspace by server can be deleted later
             "-u ${uid}:${gid} -e HOST_UID=${uid} -e HOST_GID=${gid} ",
