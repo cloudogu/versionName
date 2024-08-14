@@ -100,11 +100,11 @@ Running [Jenkinsfile](Jenkinsfile) with the [pipeline plugin](https://wiki.jenki
 
 # Releasing
 
-* rebase develop onto main
-* `mvn versions:set -DnewVersion=2.2.1 -DgenerateBackupPoms=false`
-* git commit, tag, push
-* mvn versions:set -DnewVersion=2.2.2-SNAPSHOT -DgenerateBackupPoms=false
-* git commit, push
-* rebase develop onto main
+* rebase `main` onto `develop`
+* `mvn versions:set -DnewVersion=2.2.0 -DgenerateBackupPoms=false`
+* `git commit -m 'Prepare release'`, `tag -s`, `push`
+* rebase `develop` onto `main`
+* `mvn versions:set -DnewVersion=2.2.1-SNAPSHOT -DgenerateBackupPoms=false`
+* `git commit -m 'Prepare next development iteration'`, `push`
 
-We might get rid of develop branch and the rebasing
+We might get rid of develop branch and the rebasing in the future.
