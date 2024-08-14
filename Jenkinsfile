@@ -105,7 +105,7 @@ boolean preconditionsForDeploymentFulfilled() {
 }
 
 private boolean shouldBranchBeDeployed() {
-    return env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop'
+    return env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'develop'
 }
 
 private boolean isBuildSuccessful() {
@@ -116,9 +116,9 @@ private boolean isBuildSuccessful() {
 
 void initMaven(Maven mvn) {
 
-    if ("master".equals(env.BRANCH_NAME)) {
+    if ("main".equals(env.BRANCH_NAME)) {
 
-        echo "Building master branch"
+        echo "Building main branch"
         mvn.additionalArgs += " -DperformRelease "
         currentBuild.description = mvn.getVersion()
     }
