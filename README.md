@@ -95,6 +95,16 @@ See [examples/README.md](examples/README.md)
 
 # Jenkins
 Running [Jenkinsfile](Jenkinsfile) with the [pipeline plugin](https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Plugin) (tested with version 2.4) requires
-- A JDK defined as  Jenkins tool (see [Jenkinsfile](Jenkinsfile) for name of JDK tool)
-- Maven defined as Jenkins tool (see [Jenkinsfile](Jenkinsfile) for name of Maven tool)
+- Docker
 - Optional: You can add a build parameter `RECIPIENTS` that contains a comma-separated list of all email recipients
+
+# Releasing
+
+* rebase develop onto main
+* `mvn versions:set -DnewVersion=2.2.1 -DgenerateBackupPoms=false`
+* git commit, tag, push
+* mvn versions:set -DnewVersion=2.2.2-SNAPSHOT -DgenerateBackupPoms=false
+* git commit, push
+* rebase develop onto main
+
+We might get rid of develop branch and the rebasing
